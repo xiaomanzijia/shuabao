@@ -29,10 +29,10 @@ android {
     //正式打包时隐藏signingConfigs
     signingConfigs {
         release {
-            keyAlias 'shuabao'
-            keyPassword 'jhlc5173'
-            storeFile file('../shuabao.jks')
-            storePassword 'jhlc5173'
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+            storeFile file(RELEASE_STORE_FILE)
+            storePassword RELEASE_STORE_PASSWORD
         }
         config {
             keyAlias 'androiddebugkey'
