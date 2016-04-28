@@ -1,0 +1,12 @@
+package com.jhlc.km.sb.tabtresure.model;
+
+import java.util.Map;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public interface TresureModel {
+
+    void loadTresure(String url, Map<String,String> params,TresureMdolImpl.onLoadListener listener);
+
+}

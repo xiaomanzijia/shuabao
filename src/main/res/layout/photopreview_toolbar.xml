@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/colorPrimary"
+    tools:showIn="@layout/activity_photopreview_layout"
+    android:layout_height="?attr/actionBarSize">
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:background="@color/transparent"
+        android:id="@+id/ibtnClose"
+        android:src="@drawable/ibtn_photopreview_close"
+
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textPhotoPreviewTitle"
+        android:textColor="@color/white"
+        android:text="@string/photopreview_text_title"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+</RelativeLayout>

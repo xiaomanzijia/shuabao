@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+    android:background="@color/white"
+    android:layout_height="wrap_content"
+    android:id="@+id/rlWeChatNum">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textLeft"
+        android:text="@string/personalprofile_wecharnum"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_margin="@dimen/abc_action_bar_content_inset_material"
+        android:textColor="@color/abc_primary_text_material_light" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:id="@+id/textWeChatNum"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/ibtnWeChatForward"
+        android:layout_centerVertical="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:src="@drawable/me_forward"
+        android:id="@+id/ibtnWeChatForward"
+        android:background="@android:color/transparent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+</RelativeLayout>

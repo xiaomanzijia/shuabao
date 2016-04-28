@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+    <com.jhlc.km.sb.view.PreImageLayout
+        android:id="@+id/preimagelayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.jhlc.km.sb.view.PreImageLayout>
+
+    <include layout="@layout/activity_toolbar_layout"></include>
+
+    <!--<com.jhlc.km.sb.view.PreNewImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:id="@+id/image"-->
+        <!--android:scaleType="centerCrop"-->
+        <!--android:src="@drawable/viewpager_img1"-->
+        <!--android:layout_height="match_parent" />-->
+
+</FrameLayout>

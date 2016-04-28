@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:id="@+id/coordinator"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:id="@+id/appbarLayout"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:id="@+id/rlMeUserHead"
+                android:background="@color/colorPrimary"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/me_forward"
+                    android:background="@color/transparent"
+                    android:padding="@dimen/abc_action_bar_content_inset_material"
+                    android:id="@+id/ibtnGo"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/sdUserHead"
+                    fresco:roundAsCircle="true"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/abc_action_bar_stacked_max_height"
+                    android:clickable="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/btnOpinionBack"
+                    android:text="意见反馈"
+                    android:clickable="true"
+                    android:textSize="@dimen/text_size16"
+                    android:textColor="@color/white"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:id="@+id/llUserName"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/sdUserHead">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:id="@+id/textUserName"
+                        android:text="付旭东"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/abc_action_bar_overflow_padding_start_material"
+                        android:textColor="@color/white" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:background="@color/transparent"
+                        android:src="@drawable/btn_dingwei"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/abc_action_bar_overflow_padding_start_material"
+                        android:id="@+id/imgLocation" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="浙江金华"
+                        android:id="@+id/textAddress"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/dim_foreground_disabled_material_dark" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/textOpinion"
+                    android:text="宝贝10见，被赞200次"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/llUserName"
+                    android:paddingTop="@dimen/abc_action_bar_overflow_padding_start_material"
+                    android:paddingBottom="@dimen/abc_action_bar_content_inset_material" />
+            </RelativeLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/llRecycler"
+        android:layout_height="wrap_content">
+
+            <include layout="@layout/tab_me_search_condition" android:id="@+id/includeMeSearch"></include>
+
+            <View
+                android:layout_width="match_parent"
+                android:background="@color/dim_foreground_disabled_material_dark"
+                android:layout_height="1dp"></View>
+
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:layout_width="match_parent"
+                android:id="@+id/tabSwipeRefresh"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:id="@+id/tabRecyler"
+                    android:layout_height="wrap_content">
+                </android.support.v7.widget.RecyclerView>
+
+            </android.support.v4.widget.SwipeRefreshLayout>
+
+    </LinearLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</android.support.v4.widget.DrawerLayout>

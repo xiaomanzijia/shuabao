@@ -1,0 +1,513 @@
+package com.jhlc.km.sb.activity;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.PixelFormat;
+import android.hardware.Camera;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.Size;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.common.StoragePicure;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.utils.FileUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 25/3/16.
+ */
+public class TakePicAcitivity extends BaseActivity implements SurfaceHolder.Callback {
+
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.ibtnFlash)
+    ImageButton ibtnFlash;
+    @Bind(R.id.ibtnQuesiton)
+    ImageButton ibtnQuesiton;
+    @Bind(R.id.mSurfaceView)
+    SurfaceView mSurfaceView;
+    @Bind(R.id.btnTakePic)
+    Button btnTakePic;
+    @Bind(R.id.btnStopTakePic)
+    Button btnStopTakePic;
+
+    private Camera mCamera;
+    private SurfaceHolder holder;
+    public int pictureOrientation = 0;
+
+
+    private int[] pixels;
+
+
+    int count = 0;
+
+    boolean doingback = false;
+
+    MediaPlayer shootMP;
+
+    File secondFile;
+
+
+    @Override
+    public void initView() {
+        super.initView();
+        btnTakePic.getBackground().setAlpha(80);
+        btnStopTakePic.getBackground().setAlpha(80);
+        holder = mSurfaceView.getHolder();
+        holder.addCallback(TakePicAcitivity.this);
+        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        //创建图片存储文件夹并清空之前内容
+        createFile();
+    }
+
+    private void createFile() {
+        Log.i("TakePicActivity", "createFile");
+        secondFile = new File(Constants.CaptureFilePath + "pictest" + "/");
+        if (!secondFile.exists()) {
+            secondFile.mkdir();
+        } else {
+            FileUtils.deleteAllFiles(secondFile);
+        }
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_takepic_layout);
+        ButterKnife.bind(this);
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.ibtnFlash, R.id.ibtnQuesiton, R.id.btnTakePic, R.id.btnStopTakePic})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.ibtnFlash:
+//                ToastUtils.show(getApplicationContext(), "闪电");
+                break;
+            case R.id.ibtnQuesiton:
+//                ToastUtils.show(getApplicationContext(), "帮助");
+                break;
+            case R.id.btnTakePic:
+                llBack.setEnabled(false);
+                ibtnFlash.setEnabled(false);
+                ibtnQuesiton.setEnabled(false);
+                //点击后自动对焦,对焦成功后开始拍照
+                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                    @Override
+                    public void onAutoFocus(boolean success, Camera camera) {
+                        if (success) {
+                            //设置拍照预览回调
+                            mCamera.setPreviewCallback(prviewCallback);
+                        }
+                    }
+                });
+                break;
+            case R.id.btnStopTakePic:
+                llBack.setEnabled(true);
+                ibtnFlash.setEnabled(true);
+                ibtnQuesiton.setEnabled(true);
+                stopCamera();
+                Intent photopreview = new Intent(getApplicationContext(), PhotoPreviewActivity.class);
+                startActivity(photopreview);
+                break;
+        }
+    }
+
+    Camera.PreviewCallback prviewCallback = new Camera.PreviewCallback() {
+        @Override
+        public void onPreviewFrame(byte[] bytes, Camera camera) {
+
+
+            if (Environment.getExternalStorageState().equals(
+                    Environment.MEDIA_MOUNTED)) // 判断SD卡是否存在，并且可以可以读写
+            {
+
+            } else {
+                Toast.makeText(TakePicAcitivity.this, "SD卡不存在或写保护",
+                        Toast.LENGTH_LONG).show();
+            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    shootSound();
+                }
+            }).start();
+
+            if (pixels == null) {
+                pixels = new int[mCamera.getParameters().getPreviewSize().width * mCamera.getParameters().getPreviewSize().height];
+            }
+
+            /**
+             * 存储方法一:不能解决图片旋转
+             */
+
+            try {
+                Calendar c = Calendar.getInstance();
+                String time = StoragePicure.formatTimer(c.get(Calendar.YEAR)) + "-"
+                        + StoragePicure.formatTimer(c.get(Calendar.MONTH)) + "-"
+                        + StoragePicure.formatTimer(c.get(Calendar.DAY_OF_MONTH)) + " "
+                        + StoragePicure.formatTimer(c.get(Calendar.HOUR_OF_DAY)) + "."
+                        + StoragePicure.formatTimer(c.get(Calendar.MINUTE)) + "."
+                        + StoragePicure.formatTimer(c.get(Calendar.SECOND));
+                System.out.println("现在时间：" + time + "  将此时间当作图片名存储");
+
+                String path = secondFile + "/" + time + ".jpg";
+                File file1 = new File(path);
+                if (!file1.exists()) {
+                    file1.createNewFile();
+                }
+           /* FileOutputStream filecon = new FileOutputStream(path);
+
+
+            YuvImage yuvImage = new YuvImage(data, ImageFormat.NV21, size.width,size.height, null);
+
+            if(yuvImage != null){
+                yuvImage.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, filecon);
+            }
+
+            yuvImage=null;
+            data=null;
+            System.gc();
+            */
+                Camera.Size size = mCamera.getParameters().getPreviewSize();
+
+
+                int[] imagePixels = convertYUV420_NV21toRGB8888(bytes, size.width, size.height);
+
+                Bitmap bitmapImage = Bitmap.createBitmap(imagePixels, size.width, size.height, Bitmap.Config.ARGB_8888);
+                imagePixels = null;
+
+                //处理旋转
+                Bitmap bMapRotate;
+                Matrix matrix = new Matrix();
+                matrix.reset();
+                matrix.postRotate(90);
+                bMapRotate = Bitmap.createBitmap(bitmapImage, 0, 0, bitmapImage.getWidth(),
+                        bitmapImage.getHeight(), matrix, true);
+                //将旋转后的图片保存到文件
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                if (!bMapRotate.compress(Bitmap.CompressFormat.JPEG, 80, out)) {
+                    Log.d("output", "problem converting yuv to jpg");
+
+                }
+                if(file1.exists()){
+                    FileOutputStream s = new FileOutputStream(file1);
+                    s.write(out.toByteArray());
+                    s.flush();
+                    s.close();
+                    s = null;
+                }
+                bitmapImage.recycle();
+                bMapRotate.recycle();
+                // bitmapImage.recycle();
+                System.gc();
+//            FileOutputStream fos = new FileOutputStream(file1); // Get file output stream
+//            fos.write(data);                                               // Written to the file
+//            fos.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+//            StorageAsyncTask asyncTask = new StorageAsyncTask(createFile(),mCamera.getParameters().getPreviewSize());
+//
+//            if (!doingback) {
+//                asyncTask.execute(bytes);
+//            }
+
+
+//            //另启线程存储图片
+//            Thread save = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    StoragePicure.savePicture(yuvdata, mCamera.getParameters().getPreviewSize(), secondFile);
+//                }
+//            });
+
+        }
+    };
+
+    class StorageAsyncTask extends AsyncTask<byte[], Integer, Integer> {
+
+        Camera.Size size;
+        File file;
+
+        public StorageAsyncTask(File file, Camera.Size size) {
+            this.file = file;
+            this.size = size;
+        }
+
+        @Override
+        protected void onPostExecute(Integer s) {
+            super.onPostExecute(s);
+            doingback = false;
+            Log.i("count", s + "");
+        }
+
+        @Override
+        protected Integer doInBackground(byte[]... params) {
+            StoragePicure.savePicture(params[0], size, file);
+            doingback = true;
+            count++;
+            return count;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+        }
+    }
+
+    @Override
+    public void surfaceCreated(final SurfaceHolder holder) {
+        try {
+            /* 打开相机， */
+            System.out.println("打开照相功能！");
+            mCamera = Camera.open();
+            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    if (success) {
+                        try {
+                            mCamera.setPreviewDisplay(holder);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+            mCamera.setPreviewDisplay(holder);
+        } catch (IOException exception) {
+            mCamera.release();
+            mCamera = null;
+        }
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        initCamera();
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        stopCamera();
+        mCamera.release();
+        mCamera = null;
+    }
+
+
+    private void setDisplayOrientation(Context context) {
+        int rotation = ((Activity) context).getWindowManager()
+                .getDefaultDisplay().getRotation();
+        int degree = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degree = 0;
+                break;
+            case Surface.ROTATION_90:
+                degree = 90;
+                break;
+            case Surface.ROTATION_180:
+                degree = 180;
+                break;
+            case Surface.ROTATION_270:
+                degree = 270;
+                break;
+        }
+        int result;
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        //Camera.getCameraInfo(mBackCameraId, info);
+        Camera.getCameraInfo(0, info);
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degree) % 360;
+            result = (360 - result) % 360;
+        } else {
+            result = (info.orientation - degree + 360) % 360;
+        }
+        mCamera.setDisplayOrientation(result);
+        Log.v("Camera", "result:" + result);
+        pictureOrientation = result;
+    }
+
+    /* 相机初始化的method */
+    private void initCamera() {
+        if (mCamera != null) {
+            setDisplayOrientation(this);
+            Log.i("CameraAty", "相机初始化");
+            try {
+                DisplayMetrics dm = new DisplayMetrics();
+                //获取屏幕信息
+                getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+                int screenWidth = dm.widthPixels;
+
+                int screenHeigh = dm.heightPixels;
+                Camera.Parameters parameters = mCamera.getParameters();
+                parameters.setPictureFormat(PixelFormat.JPEG);
+                List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();
+                int reasonablei = 0;
+                Collections.sort(sizeList, new Comparator<Camera.Size>() {
+                    @Override
+                    public int compare(Camera.Size lhs, Camera.Size rhs) {
+                        int widtha = lhs.width;
+                        int widthb = rhs.width;
+                        return widthb - widtha;
+                    }
+                });
+                //这里判断previewsize 和屏幕宽度比较,屏幕宽度大于等与 previewsize
+                for (int i = 0; i < sizeList.size(); i++) {
+//                    Log.i("sizeList", "width:" + sizeList.get(i).width + "" + "  height:" + sizeList.get(i).height + "");
+//
+
+                    Log.i("sizeList", screenWidth + "width:" + sizeList.get(i).width + "" + "  height:" + sizeList.get(i).height + "");
+                    Camera.Size size = sizeList.get(i);
+
+                    if (screenWidth >= size.width) {
+                        reasonablei = i;
+                        break;
+                    }
+
+                }
+                //int mid = 0;
+                Log.i("max", "maxwidth:" + sizeList.get(reasonablei).width + "  maxheight:" + sizeList.get(reasonablei).height);
+                int picWidth = sizeList.get(reasonablei).width;
+                int picHeight = sizeList.get(reasonablei).height;
+                parameters.setPreviewSize(picWidth, picHeight);
+                parameters.setRotation(90);
+//               parameters.setPictureSize(intScreenWidth, intScreenHeight);
+//                parameters.setPreviewSize(picWidth,picHeight);
+                mCamera.setParameters(parameters);
+                /* 打开预览画面 */
+                mCamera.startPreview();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void shootSound() {
+        AudioManager meng = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int volume = meng.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+
+        if (volume != 0) {
+            if (shootMP == null)
+                shootMP = MediaPlayer.create(TakePicAcitivity.this, Uri.parse("file:///system/media/audio/ui/camera_click.ogg"));
+            if (shootMP != null)
+                shootMP.start();
+        }
+    }
+
+    /* 停止相机的method */
+    private void stopCamera() {
+        if (mCamera != null) {
+            try {
+                /* 停止预览 */
+                mCamera.stopPreview();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+        createFile();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+    public int[] convertYUV420_NV21toRGB8888(byte[] data, int width, int height) {
+        int size = width * height;
+        int offset = size;
+
+        if (pixels == null) {
+            pixels = new int[size];
+        }
+        int u, v, y1, y2, y3, y4;
+
+        // i percorre os Y and the final pixels
+        // k percorre os pixles U e V
+        for (int i = 0, k = 0; i < size; i += 2, k += 2) {
+            y1 = data[i] & 0xff;
+            y2 = data[i + 1] & 0xff;
+            y3 = data[width + i] & 0xff;
+            y4 = data[width + i + 1] & 0xff;
+
+            u = data[offset + k] & 0xff;
+            v = data[offset + k + 1] & 0xff;
+            u = u - 128;
+            v = v - 128;
+
+            pixels[i] = convertYUVtoRGB(y1, u, v);
+            pixels[i + 1] = convertYUVtoRGB(y2, u, v);
+            pixels[width + i] = convertYUVtoRGB(y3, u, v);
+            pixels[width + i + 1] = convertYUVtoRGB(y4, u, v);
+
+            if (i != 0 && (i + 2) % width == 0)
+                i += width;
+        }
+
+        return pixels;
+    }
+
+    private int convertYUVtoRGB(int y, int u, int v) {
+        int r, g, b;
+
+        r = y + (int) 1.402f * v;
+        g = y - (int) (0.344f * u + 0.714f * v);
+        b = y + (int) 1.772f * u;
+        r = r > 255 ? 255 : r < 0 ? 0 : r;
+        g = g > 255 ? 255 : g < 0 ? 0 : g;
+        b = b > 255 ? 255 : b < 0 ? 0 : b;
+        return 0xff000000 | (b << 16) | (g << 8) | r;
+    }
+}

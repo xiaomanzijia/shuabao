@@ -1,0 +1,112 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:orientation="horizontal"
+    card_view:cardBackgroundColor="@color/white"
+    card_view:cardCornerRadius="5dp" >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:id="@+id/llUser"
+            android:layout_height="wrap_content">
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/imgUserHead"
+                fresco:roundAsCircle="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="@dimen/abc_button_padding_horizontal_material" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/tvUserName"
+                android:text="付旭东"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/imgUserHead"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/imgTreasure"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_below="@+id/llUser"
+            android:layout_marginLeft="@dimen/abc_button_padding_horizontal_material"
+            android:layout_marginRight="@dimen/abc_button_padding_horizontal_material"
+            android:layout_marginBottom="@dimen/abc_button_padding_horizontal_material" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/tvDiscribe"
+            android:text="和田玉白玉 手链"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imgTreasure"
+            android:layout_marginLeft="@dimen/abc_button_padding_horizontal_material"
+            android:layout_marginBottom="@dimen/abc_button_padding_horizontal_material" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/tvPrice"
+            android:text="1000元"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvDiscribe"
+            android:layout_marginLeft="@dimen/abc_button_padding_horizontal_material"
+            android:layout_marginBottom="@dimen/abc_button_padding_horizontal_material" />
+
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/report_comment"
+            android:id="@+id/ibtnComment"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/tvPrice"
+            android:paddingRight="@dimen/abc_action_bar_subtitle_bottom_margin_material"
+            android:layout_toRightOf="@+id/tvPrice"
+            android:layout_marginLeft="30dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="22"
+            android:id="@+id/textCommentNums"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/abc_action_bar_overflow_padding_start_material"
+            android:textColor="@color/dim_foreground_disabled_material_light"
+            android:layout_toRightOf="@+id/ibtnComment"
+            android:layout_alignBottom="@+id/ibtnComment" />
+
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:id="@+id/ibtnThumb"
+            android:background="@android:color/transparent"
+            android:src="@drawable/report_thumb"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/abc_action_bar_subtitle_bottom_margin_material"
+            android:layout_toRightOf="@+id/textCommentNums"
+            android:layout_alignBottom="@+id/textCommentNums" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="6"
+            android:id="@+id/textThumbNums"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dim_foreground_disabled_material_light"
+            android:layout_alignParentRight="false"
+            android:layout_alignParentBottom="false"
+            android:layout_toRightOf="@+id/ibtnThumb"
+            android:layout_alignBottom="@+id/ibtnThumb" />
+
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

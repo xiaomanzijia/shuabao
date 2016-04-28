@@ -1,0 +1,35 @@
+package com.jhlc.km.sb;
+
+import android.app.Application;
+import android.content.Context;
+
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.stetho.Stetho;
+
+import java.util.concurrent.TimeUnit;
+
+import butterknife.ButterKnife;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class SbApplication extends Application {
+
+    private static Context mContext;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        //Fresco
+        Fresco.initialize(this);
+        //用于调试
+        Stetho.initializeWithDefaults(this);
+        mContext = getApplicationContext();
+    }
+
+
+    public static Context getContext() {
+        return mContext;
+    }
+
+}

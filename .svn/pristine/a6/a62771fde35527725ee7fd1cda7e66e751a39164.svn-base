@@ -1,0 +1,156 @@
+package com.jhlc.km.sb.activity;
+
+import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.adapter.PopWindowApater;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.CategoryBean;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.ScreenUtils;
+import com.jhlc.km.sb.utils.SqliteUtils;
+import com.jhlc.km.sb.utils.StatusBarCompat;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.jhlc.km.sb.utils.WidgetUtils;
+import com.jhlc.km.sb.view.SearchPopupWindow;
+import com.umeng.analytics.MobclickAgent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 24/3/16.
+ */
+public class UserInfoPageAcitivity extends BaseActivity implements SearchPopupWindow.onClickListener,ServerInterfaceHelper.Listenter  {
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.sdUserHead)
+    SimpleDraweeView sdUserHead;
+    @Bind(R.id.btnFocus)
+    ImageButton btnFocus;
+    @Bind(R.id.textUserName)
+    TextView textUserName;
+    @Bind(R.id.textAddress)
+    TextView textAddress;
+    @Bind(R.id.textUserWeChatNum)
+    TextView textUserWeChatNum;
+    @Bind(R.id.textUserPhoneNum)
+    TextView textUserPhoneNum;
+    @Bind(R.id.llSearchCondition)
+    LinearLayout llSearchCondition;
+    @Bind(R.id.editSearch)
+    EditText editSearch;
+    @Bind(R.id.ibtnSearch)
+    ImageButton ibtnSearch;
+
+    private SearchPopupWindow popupWindow;
+    private SqliteUtils sqliteUtils;
+    private List<CategoryBean> menuList;
+
+    private String userid;
+    private ServerInterfaceHelper helper;
+
+    private static final String TAG = "UserInfoPageAcitivity";
+
+    @Override
+    public void initView() {
+        super.initView();
+        sqliteUtils = new SqliteUtils(UserInfoPageAcitivity.this);
+        menuList = sqliteUtils.getCategoryList();
+        popupWindow = new SearchPopupWindow(UserInfoPageAcitivity.this,menuList);
+        popupWindow.setListener(this);
+        helper = new ServerInterfaceHelper(this,UserInfoPageAcitivity.this);
+        sdUserHead.setImageURI(Uri.parse(Constants.OSS_IMAGE_URL+ PreferencesUtils.getString(UserInfoPageAcitivity.this,
+                Constants.PREFERENCES_USER_HEADIMG)));
+        userid = getIntent().getStringExtra(Constants.INTENT_USER_ID);
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_userinfo_page_layout);
+        ButterKnife.bind(this);
+        StatusBarCompat.compat(this,getResources().getColor(R.color.colorPrimary));
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.btnFocus, R.id.llSearchCondition, R.id.ibtnSearch})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnFocus:
+                if(PreferencesUtils.getBoolean(UserInfoPageAcitivity.this,Constants.PREFERENCES_IS_LOGIN)){
+                    helper.doFollow(TAG,userid);
+                }else {
+                    Intent login = new Intent(UserInfoPageAcitivity.this,LoginActivity.class);
+                    startActivity(login);
+                }
+                break;
+            case R.id.llSearchCondition:
+                if(popupWindow.isShowing()){
+                    popupWindow.dismiss();
+                }else {
+                    popupWindow.showAsDropDown(view);
+                }
+                break;
+            case R.id.ibtnSearch:
+                ToastUtils.show(getApplicationContext(),"搜索");
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+
+    @Override
+    public void onClick(int position, String menuTitle,String menuId) {
+        ToastUtils.show(UserInfoPageAcitivity.this,menuTitle);
+    }
+
+    @Override
+    public void success(Object object) {
+        if(object instanceof String && object.equals(Constants.STATUS_SUCCESS)){
+            ToastUtils.show(UserInfoPageAcitivity.this,"关注成功");
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+
+    }
+}

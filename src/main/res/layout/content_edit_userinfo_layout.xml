@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_marginTop="?attr/actionBarSize"
+    tools:showIn="@layout/activity_edit_userinfo_layout"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:id="@+id/rlSearch"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_height="wrap_content">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:hint="@string/edilt_userinfo_edit_mobile_hint"
+        android:layout_height="wrap_content"
+        android:background="@drawable/search_input"
+        android:textColor="@color/bright_foreground_disabled_material_light"
+        android:id="@+id/editMobile"
+        android:textColorHint="@color/bright_foreground_disabled_material_light"
+        android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ibtn_clear_text"
+        android:id="@+id/ibtnClear"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/edit_search_image"
+        android:layout_alignParentRight="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:id="@+id/rlYzM"
+        android:layout_below="@+id/editMobile"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:layout_marginTop="@dimen/item_line_margin_top">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/editYZM"
+            android:hint="@string/edilt_userinfo_edit_yzm_hint"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:layout_marginTop="@dimen/item_line_margin_top"
+            android:inputType="number"
+            android:padding="@dimen/abc_action_bar_content_inset_material"
+            android:textColor="@color/dim_foreground_disabled_material_light"
+            android:textColorHint="@color/dim_foreground_disabled_material_light"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:id="@+id/btnGetYzM"
+            android:textColor="@color/colorAccent"
+            android:text="@string/login_btn_getyzm"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="@dimen/abc_action_bar_content_inset_material"
+            android:visibility="visible" />
+
+    </RelativeLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="@string/login_btn_loging"
+        android:background="@drawable/btn_search_background"
+        android:id="@+id/btnSave"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editPassword"
+        android:layout_marginLeft="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginRight="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginBottom="@dimen/abc_action_bar_content_inset_material" />
+
+
+</LinearLayout>

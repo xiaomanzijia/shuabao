@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" >
+        <shape>
+            <solid android:color="@color/linegray"/>
+            <!-- 描边 -->
+            <stroke
+                    android:width="1dp"
+                    android:color="@color/linegray"
+                    android:dashWidth="5dp"
+                    android:dashGap="3dp" />
+            <!-- 圆角 -->
+            <corners
+                    android:radius="30dp" />
+            <padding
+                    android:left="@dimen/space_60"
+                    android:top="10dp"
+                    android:right="@dimen/space_30"
+                    android:bottom="10dp" />
+        </shape>
+    </item>
+
+    <item android:state_focused="true" >
+        <shape>
+
+            <stroke
+                    android:width="1dp"
+                    android:color="@color/linegray" />
+            <corners
+                    android:radius="30dp" />
+            <padding
+                    android:left="@dimen/space_60"
+                    android:top="10dp"
+                    android:right="@dimen/space_30"
+                    android:bottom="10dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape>
+            <solid android:color="@color/white"/>
+            <stroke
+                    android:width="1dp"
+                    android:color="@color/linegray" />
+            <corners
+                    android:topRightRadius="30dp"
+                    android:bottomLeftRadius="30dp"
+                    android:topLeftRadius="30dp"
+                    android:bottomRightRadius="30dp"
+                    />
+            <padding
+                    android:left="@dimen/space_60"
+                    android:top="10dp"
+                    android:right="@dimen/space_30"
+                    android:bottom="10dp" />
+        </shape>
+    </item>
+</selector>

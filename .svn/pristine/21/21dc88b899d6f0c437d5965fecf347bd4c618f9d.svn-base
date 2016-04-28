@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".activity.ReportActivity"
+    tools:showIn="@layout/activity_report_layout"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:hint="@string/report_edit_content"
+        android:id="@+id/editReportContent"
+        android:background="@color/white"
+        android:layout_height="@dimen/space_150"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:inputType="textMultiLine"
+        android:gravity="start"
+        android:textColor="@color/dim_foreground_disabled_material_light"
+        android:textColorHint="@color/dim_foreground_disabled_material_light"
+        android:scrollbars="vertical"
+        android:minLines="3"
+        android:maxLines="8" />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="@string/report_btn_submit"
+        android:background="@drawable/btn_search_background"
+        android:id="@+id/btnFeedbackSubmit"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editReportContent"
+        android:layout_margin="@dimen/abc_action_bar_content_inset_material" />
+
+
+</RelativeLayout>

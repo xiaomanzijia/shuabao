@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@color/colorPrimary"
+    android:layout_height="?attr/actionBarSize"
+    android:gravity="center_vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/llBack"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_centerVertical="true"
+        android:clickable="true">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/btn_feedback_backward"
+            android:id="@+id/btnBack"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/abc_action_bar_content_inset_material"
+            android:paddingTop="@dimen/abc_action_bar_content_inset_material"
+            android:paddingBottom="@dimen/abc_action_bar_content_inset_material"
+            android:clickable="false" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/btn_back"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/abc_action_bar_content_inset_material"
+            android:layout_toRightOf="@+id/btnBack"
+            android:id="@+id/textBack"
+            />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text=""
+        android:textColor="@color/white"
+        android:id="@+id/textTresureName"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="@string/btn_report"
+        android:id="@+id/btnReport"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:clickable="true" />
+
+</RelativeLayout>

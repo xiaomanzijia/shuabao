@@ -1,0 +1,37 @@
+package com.jhlc.km.sb.tabtresure.model;
+
+import com.jhlc.km.sb.callback.ListBeautyCallBack;
+import com.jhlc.km.sb.model.Beauty;
+import com.jhlc.km.sb.okhttp.OkHttpUtils;
+
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.Call;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class TresureMdolImpl implements TresureModel {
+
+    @Override
+    public void loadTresure(String url, Map<String, String> params, final onLoadListener listener) {
+        OkHttpUtils.post().url(url).params(params).build()
+                .execute(new ListBeautyCallBack() {
+                    @Override
+                    public void onError(Call call, Exception e) {
+                        listener.onFailure("load tresure failure",e);
+                    }
+
+                    @Override
+                    public void onResponse(List<Beauty> response) {
+                        listener.onSuccess(response);
+                    }
+                });
+    }
+
+    public interface onLoadListener {
+        void onSuccess(List<Beauty> beautyList);
+        void onFailure(String msg, Exception e);
+    }
+}

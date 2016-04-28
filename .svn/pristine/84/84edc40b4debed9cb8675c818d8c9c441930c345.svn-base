@@ -1,0 +1,151 @@
+package com.jhlc.km.sb.activity;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.fragment.MeFragment;
+import com.jhlc.km.sb.fragment.ShuaBaoFragment;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public class MainActivity extends BaseActivity {
+
+    @Bind(R.id.rbtnShuabaao)
+    RadioButton rbtnShuabaao;
+    @Bind(R.id.rbtnTakePhoto)
+    RadioButton rbtnTakePhoto;
+    @Bind(R.id.rbtnMe)
+    RadioButton rbtnMe;
+    @Bind(R.id.radiogroup)
+    RadioGroup radiogroup;
+
+    private FragmentManager manager;
+    private FragmentTransaction transaction;
+    private Fragment shuabaoFragment;
+    private Fragment meFragment;
+    private RadioGroup radioGroup;
+
+    private boolean isQuit = false;
+    private final Timer timer = new Timer();
+
+
+    @Override
+    public void initView() {
+        super.initView();
+        setSelect(0);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+//        UmengUpdateAgent.setUpdateOnlyWifi(false);
+//        UmengUpdateAgent.update(this);
+        initView();
+    }
+
+    private void setSelect(int position) {
+        manager = getSupportFragmentManager();
+        transaction = manager.beginTransaction();
+        Bundle bundle = new Bundle();
+        switch (position) {
+            case 0:
+                if (shuabaoFragment == null) {
+                    shuabaoFragment = new ShuaBaoFragment();
+                }
+                if (!shuabaoFragment.isAdded()) {
+                    bundle.putString("whichtab", "首页");
+                    shuabaoFragment.setArguments(bundle);
+                    transaction.replace(R.id.content, shuabaoFragment);
+                }
+                break;
+            case 1:
+                Intent takepic = new Intent(getApplicationContext(), TakePicAcitivity.class);
+                startActivity(takepic);
+                ToastUtils.show(getApplicationContext(), "连续拍照");
+                break;
+            case 2:
+                if (meFragment == null) {
+                    meFragment = new MeFragment();
+                }
+                if (!meFragment.isAdded()) {
+                    bundle.putString("whichtab", "我的");
+                    meFragment.setArguments(bundle);
+                    transaction.replace(R.id.content, meFragment);
+                }
+                break;
+            default:
+                break;
+        }
+        transaction.commit();
+    }
+
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (isQuit == false) {
+                isQuit = true;
+                ToastUtils.show(getApplicationContext(), "再次点击，确认退出");
+                TimerTask task = null;
+                task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        isQuit = false;
+                    }
+                };
+                timer.schedule(task, 2000);
+            } else {
+                finish();
+            }
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
+        return true;
+    }
+
+    @OnClick({R.id.rbtnShuabaao, R.id.rbtnTakePhoto, R.id.rbtnMe})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.rbtnShuabaao:
+                setSelect(0);
+                break;
+            case R.id.rbtnTakePhoto:
+                setSelect(1);
+                break;
+            case R.id.rbtnMe:
+                setSelect(2);
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+}

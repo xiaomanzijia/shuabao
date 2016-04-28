@@ -1,0 +1,12 @@
+package com.jhlc.km.sb.constants;
+
+import android.os.Environment;
+
+/**
+ * Created by licheng on 28/3/16.
+ */
+public class Constants {
+    public final static String CaptureFilePath = Environment
+            .getExternalStorageDirectory() + "/DCIM/Camera/";
+
+}

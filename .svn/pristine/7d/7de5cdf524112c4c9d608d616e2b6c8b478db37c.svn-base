@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@color/colorPrimary"
+    tools:context=".activity.PhotoPreviewActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <include layout="@layout/photopreview_toolbar"></include>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:id="@+id/imageView"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop" />
+
+    <!--<com.facebook.drawee.view.SimpleDraweeView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:id="@+id/imgTresureBig"-->
+        <!--android:layout_height="300dp"-->
+        <!--android:scaleType="centerCrop" />-->
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:background="@color/colorAccent"
+        android:layout_height="?attr/actionBarSize"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/photopreview_text_delete"
+            android:id="@+id/btnDelete"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/photopreview_text_save"
+            android:id="@+id/btnSave"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+    </RelativeLayout>
+
+
+
+</FrameLayout>

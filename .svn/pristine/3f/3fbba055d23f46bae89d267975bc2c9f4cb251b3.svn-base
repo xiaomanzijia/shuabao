@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".activity.TresureDetailActivity"
+    android:background="@color/design_fab_shadow_mid_color"
+    tools:showIn="@layout/activity_tresure_detail_layout">
+
+    <include layout="@layout/activity_toolbar_layout"
+        android:id="@+id/includeTresureToolbar"></include>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/includeTresureToolbar">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_marginBottom="?attr/actionBarSize"
+            android:layout_height="wrap_content">
+
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:id="@+id/imgTresureBig"
+                android:visibility="visible"
+                android:scaleType="centerCrop"
+                android:layout_height="300dp" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:id="@+id/rlTresureInfo"
+                android:layout_below="@+id/imgTresureBig"
+                android:layout_height="wrap_content"
+                android:background="@color/white">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/textPrice"
+                    android:padding="@dimen/abc_action_bar_content_inset_material"
+                    android:textColor="@color/colorMainRed"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true" />
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:id="@+id/btnCollect"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:background="@color/transparent"
+                    android:src="@drawable/ibtn_collection_background"
+                    android:layout_centerVertical="true"
+                    android:scaleType="fitXY"
+                    android:layout_margin="@dimen/abc_action_bar_overflow_padding_start_material" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:text="@string/btn_antiquedetail_share"
+                    android:layout_margin="@dimen/abc_action_bar_overflow_padding_start_material"
+                    android:id="@+id/btnShare"
+                    android:background="@drawable/btn_search_background"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/white"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:id="@+id/textDescribe"
+                android:text=""
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rlTresureInfo"
+                android:background="@color/white"
+                android:paddingLeft="@dimen/abc_action_bar_content_inset_material"
+                android:paddingRight="@dimen/abc_action_bar_content_inset_material"
+                android:paddingBottom="@dimen/abc_action_bar_content_inset_material" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/llUserInfo"
+                android:layout_below="@+id/textDescribe"
+                android:background="@color/white"
+                android:layout_marginTop="@dimen/abc_action_bar_content_inset_material">
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/imgCommentUserHead"
+                    fresco:roundAsCircle="true"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="@dimen/abc_action_bar_content_inset_material" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/textUserName"
+                    android:text=""
+                    android:textColor="@color/colorPrimary"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/imgCommentUserHead"
+                    android:layout_alignTop="@+id/imgCommentUserHead" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:id="@+id/textAddressTime"
+                    android:text=""
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/imgCommentUserHead"
+                    android:paddingBottom="@dimen/abc_action_bar_overflow_padding_start_material"
+                    android:layout_below="@+id/textUserName" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:background="@color/transparent"
+                    android:padding="@dimen/abc_action_bar_content_inset_material"
+                    android:src="@drawable/me_forward"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ibtnGo"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true" />
+
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_below="@+id/llUserInfo"
+                android:id="@+id/rlCommentHot"
+                android:layout_marginTop="@dimen/item_line_margin_top"
+                android:layout_height="wrap_content"
+                android:background="@color/white">
+                <TextView
+                    android:id="@+id/textCommentHot"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+                    android:background="@color/white"
+                    android:padding="@dimen/abc_action_bar_content_inset_material"
+                    android:text="热门评论"
+                    android:textColor="@color/abc_primary_text_disable_only_material_light"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/imgforwardhot" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:background="@color/transparent"
+                    android:src="@drawable/me_forward"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:padding="@dimen/abc_action_bar_content_inset_material"
+                    android:id="@+id/imgforwardhot" />
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:id="@+id/llCommentHot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rlCommentHot"
+                android:orientation="vertical"
+                android:layout_marginBottom="@dimen/item_line_margin_top">
+
+                <include layout="@layout/comment_item"></include>
+
+            </LinearLayout>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_below="@+id/llCommentHot"
+                android:id="@+id/rlCommentNew"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_line_margin_top"
+                android:background="@color/white">
+                <TextView
+                    android:id="@+id/textCommentNew"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+                    android:background="@color/white"
+                    android:padding="@dimen/abc_action_bar_content_inset_material"
+                    android:text="最新评论"
+                    android:textColor="@color/abc_primary_text_disable_only_material_light"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/imgforwardnew" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:background="@color/transparent"
+                    android:src="@drawable/me_forward"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:padding="@dimen/abc_action_bar_content_inset_material"
+                    android:id="@+id/imgforwardnew" />
+
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:id="@+id/llCommentNews"
+                android:orientation="vertical"
+                android:layout_below="@+id/rlCommentNew"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                android:layout_marginBottom="?attr/actionBarSize">
+
+                <include layout="@layout/comment_item"></include>
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_100"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone" />
+
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+
+
+
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/comment_layout"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/include"></include>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:id="@+id/imgtest"
+        android:layout_below="@+id/includeTresureToolbar"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop" />
+
+    <com.jhlc.km.sb.view.PreImageLayout
+        android:id="@+id/preimagelayout"
+        android:layout_below="@+id/includeTresureToolbar"
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.jhlc.km.sb.view.PreImageLayout>
+
+
+
+</RelativeLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/black"
+    android:id="@+id/rlTakePicToolbar"
+    tools:showIn="@layout/activity_takepic_layout"
+    android:layout_height="?attr/actionBarSize">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/llBack"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_centerVertical="true"
+        android:clickable="true">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/btn_feedback_backward"
+            android:id="@+id/btnBack"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/abc_action_bar_content_inset_material"
+            android:paddingTop="@dimen/abc_action_bar_content_inset_material"
+            android:paddingBottom="@dimen/abc_action_bar_content_inset_material"
+            android:clickable="false" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/btn_back"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/abc_action_bar_content_inset_material"
+            android:layout_toRightOf="@+id/btnBack"
+            android:id="@+id/textBack"
+            />
+
+    </LinearLayout>
+
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:background="@color/transparent"
+        android:src="@drawable/ibtn_takepic_flash"
+        android:id="@+id/ibtnFlash"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/ibtnQuesiton"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:layout_centerVertical="true" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:background="@color/transparent"
+        android:src="@drawable/ibtn_takepic_question"
+        android:id="@+id/ibtnQuesiton"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:layout_centerVertical="true" />
+
+</RelativeLayout>

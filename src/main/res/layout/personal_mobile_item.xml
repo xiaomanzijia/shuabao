@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_marginTop="@dimen/item_line_margin_top"
+    android:background="@color/white"
+    android:layout_height="wrap_content"
+    android:id="@+id/rlMobile">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textLeft"
+        android:text="@string/personalprofile_mobile"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_margin="@dimen/abc_action_bar_content_inset_material"
+        android:textColor="@color/abc_primary_text_material_light" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:id="@+id/textMobile"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/ibtnMobileForward"
+        android:layout_centerVertical="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:src="@drawable/me_forward"
+        android:id="@+id/ibtnMobileForward"
+        android:background="@android:color/transparent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+</RelativeLayout>

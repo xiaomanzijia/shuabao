@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    tools:showIn="@layout/activity_publish_tresure_layout"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/activity_toolbar_layout"></include>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@color/white"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="@dimen/space_100"
+            android:id="@+id/imgPublishTresure"
+            android:layout_height="@dimen/space_100"
+            android:layout_margin="@dimen/abc_action_bar_content_inset_material" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/editTresureDes"
+            android:background="@color/white"
+            android:hint="@string/publish_tresure_hint_introduce"
+            android:layout_height="@dimen/space_100"
+            android:layout_toRightOf="@+id/imgPublishTresure"
+            android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+            android:layout_marginRight="@dimen/abc_action_bar_content_inset_material"
+            android:layout_marginBottom="@dimen/abc_action_bar_content_inset_material"
+            android:inputType="textMultiLine"
+            android:maxLines="8"
+            android:minLines="3"
+            android:textColor="@color/dim_foreground_disabled_material_light"
+            android:textColorHint="@color/dim_foreground_disabled_material_light"
+            android:gravity="start" />
+
+    </RelativeLayout>
+
+
+    <include layout="@layout/publish_tresure_price_item"></include>
+    <include layout="@layout/personal_wechat_item"></include>
+    <include layout="@layout/personal_mobile_item"></include>
+
+
+</LinearLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    tools:showIn="@layout/activity_personal_profile_layout"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/personal_userhead_item"></include>
+    <include layout="@layout/personal_username_item"></include>
+    <include layout="@layout/personal_wechat_item"></include>
+    <include layout="@layout/personal_mobile_item"></include>
+    <include layout="@layout/personal_address_item"></include>
+
+    <Button
+        android:layout_width="match_parent"
+        android:id="@+id/btnQuit"
+        android:text="@string/personal_profile_btn_quit"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/abc_action_bar_overflow_padding_start_material" />
+
+</LinearLayout>

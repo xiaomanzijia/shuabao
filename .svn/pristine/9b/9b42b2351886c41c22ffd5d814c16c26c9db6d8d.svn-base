@@ -1,0 +1,318 @@
+package com.jhlc.km.sb.activity;
+
+import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.PointF;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import com.alibaba.sdk.android.oss.ClientException;
+import com.alibaba.sdk.android.oss.ServiceException;
+import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback;
+import com.alibaba.sdk.android.oss.callback.OSSProgressCallback;
+import com.alibaba.sdk.android.oss.model.PutObjectRequest;
+import com.alibaba.sdk.android.oss.model.PutObjectResult;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.common.OssHelper;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.common.UUIDGenerator;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.oss.OssService;
+import com.jhlc.km.sb.oss.UICallback;
+import com.jhlc.km.sb.oss.UIDispatcher;
+import com.jhlc.km.sb.oss.UIProgressCallback;
+import com.jhlc.km.sb.utils.ImageUtils;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import java.io.File;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 23/3/16.
+ */
+public class PhotoActivity extends BaseActivity implements ServerInterfaceHelper.Listenter {
+
+    @Bind(R.id.btnTakePhote)
+    Button btnTakePhote;
+    @Bind(R.id.btnChoosePhoto)
+    Button btnChoosePhoto;
+    @Bind(R.id.ibtnClose)
+    ImageButton ibtnClose;
+    @Bind(R.id.imageUserHead)
+    SimpleDraweeView imageUserHead;
+
+    private ServerInterfaceHelper helper;
+    private OssHelper ossHelper;
+    private OssService ossService;
+    //负责所有的界面更新
+    private UIDispatcher UIDispatcher;
+    private Handler handler = new Handler();
+
+    private String userheadimg;
+
+    private static final String TAG = "PhotoActivity";
+
+    private PointF focusPoint;
+
+    @Override
+    public void initView() {
+        super.initView();
+        initDialog();
+        imageUserHead.setImageURI(Uri.parse(PreferencesUtils.getString(PhotoActivity.this,
+                Constants.PREFERENCES_USER_HEADIMG)));
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_photo_layout);
+        ButterKnife.bind(this);
+        initView();
+        initData();
+    }
+
+    private void initData() {
+        ossHelper = new OssHelper(PhotoActivity.this);
+        ossService = ossHelper.initOSS();
+        UIDispatcher = new UIDispatcher(Looper.getMainLooper());
+        helper = new ServerInterfaceHelper(this,PhotoActivity.this);
+        focusPoint = new PointF(0.5f,0.5f);
+        imageUserHead.getHierarchy().setActualImageFocusPoint(focusPoint);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case 1:
+                if(data != null && data.getData() != null) {
+                    Intent intent1 = new Intent(PhotoActivity.this,ClipPictureActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("url", data.getData());
+                    intent1.putExtras(bundle);
+                    startActivityForResult(intent1, 3);
+                }
+//                Uri uri = data.getData();
+//                if(uri == null){
+//                    Bundle bundle = data.getExtras();
+//                    if(bundle != null){
+//                        Bitmap photo = (Bitmap) bundle.get("data");
+//                        imageUserHead.setImageBitmap(photo);
+//                    }
+//                }else {
+//                    imageUserHead.setImageURI(uri);
+//                }
+                break;
+            case 2:
+                if (resultCode == RESULT_OK) {
+                    if(data !=null){ //可能尚未指定intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                        //返回有缩略图
+                        if(data.hasExtra("data")){
+                            Bitmap thumbnail = data.getParcelableExtra("data");
+                            Intent intent1 = new Intent(PhotoActivity.this,ClipPictureActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable("bitmap", thumbnail);
+                            intent1.putExtras(bundle);
+                            startActivityForResult(intent1, 3);
+                        }
+                    }else{
+                        //由于指定了目标uri，存储在目标uri，intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                        // 通过目标uri，找到图片
+                        // 对图片的缩放处理
+                        // 操作
+                    }
+                }
+                break;
+            case 3:
+                Bitmap bitmap = null;
+                if (data != null)
+                {
+                    byte[] bis = data.getByteArrayExtra("bitmap");
+                    bitmap = BitmapFactory.decodeByteArray(bis, 0, bis.length);
+                    imageUserHead.setImageBitmap(bitmap);
+                }
+                //得到bitmap后的操作
+                try{
+                    //setPicToView(bitmap);//保存在SD卡中
+                    ImageUtils.setPicToView(bitmap,"head");
+                } catch (Exception e){
+                    // 保存不成功时捕获异常
+                    e.printStackTrace();
+                }
+                /**
+                 * 上传服务器代码
+                 */
+                    File file = new File(ImageUtils.path);
+                    if(file.exists()){
+                        File[] files = file.listFiles();
+                        File headimage = files[0];
+                        String headimagepath = headimage.getAbsolutePath();
+                        Log.i("PhotoActivity",headimagepath+"  "+files.length);
+                        String object = UUIDGenerator.getUUID();
+                        if (headimagepath.endsWith(".jpg")) {
+                            object = object + ".jpg";
+                        } else if (headimagepath.endsWith(".png")) {
+                            object = object + ".png";
+                        } else if (headimagepath.endsWith(".gif")) {
+                            object = object + ".gif";
+                        } else if (headimagepath.endsWith(".icon")) {
+                            object = object + ".icon";
+                        }
+                        userheadimg = object;
+                        progressDialog.show();
+                        //上传到OSS
+                        ossService.asyncPutImage(object, headimagepath,getPutCallback(),new ProgressCallbackFactory<PutObjectRequest>().get());
+                    }
+                break;
+            default:
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+
+    }
+
+    public UICallback<PutObjectRequest, PutObjectResult> getPutCallback() {
+        return new UICallback<PutObjectRequest, PutObjectResult>(UIDispatcher) {
+            @Override
+            public void onSuccess(PutObjectRequest request, PutObjectResult result) {
+                Log.d("PutObject", "UploadSuccess");
+
+                Log.d("ETag", result.getETag());
+                Log.d("RequestId", result.getRequestId());
+                final String object = request.getObjectKey();
+                final String ETag = result.getETag();
+                final String requestid = result.getRequestId();
+                final String callback = result.getServerCallbackReturnBody();
+                Log.i(TAG, "上传成功" + object + " " + ETag + " " + requestid + " " + callback);
+
+                addCallback(new Runnable() {
+                    @Override
+                    public void run() {
+                        //调用发布投诉接口
+                        handler.post(runnable);
+                    }
+                }, null);
+                super.onSuccess(request, result);
+            }
+
+            @Override
+            public void onFailure(PutObjectRequest request, ClientException clientExcepion, ServiceException serviceException) {
+                String info = "";
+                final String object = request.getObjectKey();
+                // 请求异常
+                if (clientExcepion != null) {
+                    // 本地异常如网络异常等
+                    clientExcepion.printStackTrace();
+                    info = clientExcepion.toString();
+                }
+                if (serviceException != null) {
+                    // 服务异常
+                    Log.e("ErrorCode", serviceException.getErrorCode());
+                    Log.e("RequestId", serviceException.getRequestId());
+                    Log.e("HostId", serviceException.getHostId());
+                    Log.e("RawMessage", serviceException.getRawMessage());
+                    info = serviceException.toString();
+                }
+                final String outputinfo = new String(info);
+                addCallback(null, new Runnable() {
+                    @Override
+                    public void run() {
+
+                    }
+                });
+                onFailure(request, clientExcepion, serviceException);
+            }
+        };
+    }
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            helper.updateUserInfo(TAG, PreferencesUtils.getString(PhotoActivity.this, Constants.PREFERENCES_USERID),
+                    Constants.INTENT_TYPE_EDIT_HEADIMGURL,userheadimg);
+        }
+    };
+
+    @Override
+    public void success(Object object) {
+        if(object instanceof String && object.equals(Constants.INTERFACE_EDITUSERINFO_SUCCESS)){
+            ToastUtils.show(PhotoActivity.this,Constants.INTERFACE_EDITUSERINFO_SUCCESS);
+            PreferencesUtils.putString(PhotoActivity.this,Constants.PREFERENCES_USER_HEADIMG,Constants.OSS_IMAGE_URL+userheadimg);
+            progressDialog.dismiss();
+            finish();
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+
+    }
+
+    private class ProgressCallbackFactory<T> {
+        public UIProgressCallback<T> get() {
+            return new UIProgressCallback<T>(UIDispatcher) {
+                @Override
+                public void onProgress(T request, long currentSize, long totalSize) {
+                    final int progress = (int) (100 * currentSize / totalSize);
+                    addCallback(new Runnable() {
+                        @Override
+                        public void run() {
+
+                        }
+                    });
+                    super.onProgress(request, currentSize, totalSize);
+                }
+            };
+        }
+    }
+
+    @OnClick({R.id.btnTakePhote, R.id.btnChoosePhoto, R.id.ibtnClose})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnTakePhote:
+                Intent photo = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(photo,2);
+                break;
+            case R.id.btnChoosePhoto:
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_PICK);
+                startActivityForResult(intent, 1);
+                break;
+            case R.id.ibtnClose:
+                finish();
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+}

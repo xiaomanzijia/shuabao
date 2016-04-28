@@ -1,0 +1,26 @@
+package com.jhlc.km.sb;
+
+import android.app.Application;
+
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.jhlc.km.sb.okhttp.OkHttpUtils;
+
+import java.util.concurrent.TimeUnit;
+
+import butterknife.ButterKnife;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class SbApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        //okhttp
+        OkHttpUtils.getInstance().setConnectTimeout(100000, TimeUnit.MILLISECONDS);
+
+        //Fresco
+        Fresco.initialize(this);
+
+    }
+}

@@ -1,0 +1,8 @@
+package com.jhlc.km.sb.antiquedetail.presenter;
+
+/**
+ * Created by licheng on 31/3/16.
+ */
+public interface AntiqueDetailPresenter {
+    void loadAntiqueDeatial(int pageIndex, int pageSize, int id ,String userid);
+}

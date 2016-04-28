@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:padding="@dimen/abc_action_bar_overflow_padding_start_material"
+    android:layout_marginTop="@dimen/item_line_margin_top"
+    >
+
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/imgUserHead"
+        fresco:roundAsCircle="true"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="@dimen/abc_action_bar_overflow_padding_end_material" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textUserName"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:layout_toRightOf="@+id/imgUserHead"
+        android:layout_alignTop="@+id/imgUserHead" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textThumbComment"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/textUserName"
+        android:layout_alignTop="@+id/textUserName"
+        android:layout_marginLeft="@dimen/abc_action_bar_overflow_padding_start_material" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textTime"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textUserName"
+        android:paddingTop="@dimen/abc_button_inset_vertical_material"
+        android:paddingBottom="@dimen/abc_button_inset_vertical_material"
+        android:textColor="@color/abc_primary_text_material_light"
+        android:layout_below="@+id/textUserName" />
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/imgIndex"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="@dimen/abc_action_bar_overflow_padding_end_material"
+        android:layout_alignParentRight="true" />
+
+
+</RelativeLayout>

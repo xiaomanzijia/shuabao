@@ -1,0 +1,135 @@
+package com.jhlc.km.sb.activity;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.StringUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 29/3/16.
+ */
+public class EditUserInfoActivity extends BaseActivity implements ServerInterfaceHelper.Listenter {
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.textTresureName)
+    TextView textTresureName;
+    @Bind(R.id.btnReport)
+    TextView btnReport;
+    @Bind(R.id.editMobile)
+    EditText editMobile;
+    @Bind(R.id.ibtnClear)
+    ImageButton ibtnClear;
+    @Bind(R.id.editYZM)
+    EditText editYZM;
+    @Bind(R.id.btnGetYzM)
+    Button btnGetYzM;
+    @Bind(R.id.btnSave)
+    Button btnSave;
+    @Bind(R.id.rlYzM)
+    RelativeLayout rlYzM;
+
+    private ServerInterfaceHelper helper;
+    private final static String TAG = "EditUserInfoActivity";
+
+    @Override
+    public void initView() {
+        super.initView();
+        if (Constants.INTENT_TYPE_FORGET_PASSWORD.equals(getIntent().getStringExtra(Constants.INTENT_TYPE))) {
+            initPwdView();
+        } else if (Constants.INTENT_TYPE_EDIT_USERINFO.equals(getIntent().getStringExtra(Constants.INTENT_TYPE))) {
+            initEditInfoView();
+        }
+        helper = new ServerInterfaceHelper(this,EditUserInfoActivity.this);
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_edit_userinfo_layout);
+        ButterKnife.bind(this);
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.ibtnClear, R.id.btnGetYzM, R.id.btnSave})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.ibtnClear:
+                editMobile.setText("");
+                break;
+            case R.id.btnGetYzM:
+                String phonenum = editMobile.getText().toString();
+                helper.getServerYzM(TAG,phonenum);
+                break;
+            case R.id.btnSave:
+                if("下一步".equals(btnSave.getText().toString())){
+                    initPwdNext();
+                }else if("确认".equals(btnSave.getText().toString())){
+                    ToastUtils.show(EditUserInfoActivity.this, "密码修改");
+                }else if("保存".equals(btnSave.getText().toString())){
+                    String editcontent = editMobile.getText().toString();
+                    if(StringUtils.isBlank(editcontent)){
+                        ToastUtils.show(EditUserInfoActivity.this,"输入不能为空");
+                    }else {
+                        helper.updateUserInfo(TAG, PreferencesUtils.getString(EditUserInfoActivity.this,
+                                Constants.PREFERENCES_USERID),"",editcontent);
+                    }
+                    ToastUtils.show(EditUserInfoActivity.this, "保存");
+                }
+                break;
+        }
+    }
+
+    private void initPwdView() {
+        textTresureName.setText("找回密码");
+        editMobile.setHint("手机号");
+        editYZM.setHint("验证码");
+        rlYzM.setVisibility(View.VISIBLE);
+        btnSave.setText("下一步");
+    }
+
+    private void initEditInfoView() {
+        textTresureName.setText("信息修改");
+        rlYzM.setVisibility(View.GONE);
+        btnSave.setText("保存");
+    }
+
+    private void initPwdNext(){
+        textTresureName.setText("找回密码");
+        editMobile.setHint("新密码");
+        editYZM.setHint("确认密码");
+        btnSave.setText("确认");
+        btnGetYzM.setVisibility(View.GONE);
+
+    }
+
+    @Override
+    public void success(Object object) {
+        if(object instanceof String && object.equals(Constants.INTERFACE_MSG_CODE_SUCCESS)){
+            ToastUtils.show(EditUserInfoActivity.this,Constants.INTERFACE_MSG_CODE_SUCCESS);
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+
+    }
+}

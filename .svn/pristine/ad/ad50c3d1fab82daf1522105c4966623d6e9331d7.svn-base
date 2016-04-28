@@ -1,0 +1,31 @@
+package com.jhlc.km.sb.model;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
+/**
+ * Created by licheng on 29/3/16.
+ */
+public class UserModel extends BaseModel{
+    @SerializedName("user")
+    private UserBean userBean;
+    @SerializedName("catagorylist")
+    private List<CategoryBean> categoryBeanList;
+
+    public UserBean getUserBean() {
+        return userBean;
+    }
+
+    public void setUserBean(UserBean userBean) {
+        this.userBean = userBean;
+    }
+
+    public List<CategoryBean> getCategoryBeanList() {
+        return categoryBeanList;
+    }
+
+    public void setCategoryBeanList(List<CategoryBean> categoryBeanList) {
+        this.categoryBeanList = categoryBeanList;
+    }
+}

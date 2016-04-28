@@ -1,0 +1,60 @@
+package com.jhlc.km.sb.tabtresure.model;
+
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.android.volley.VolleyError;
+import com.google.gson.Gson;
+import com.jhlc.km.sb.common.Des3;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.BaseModel;
+import com.jhlc.km.sb.model.Beauty;
+import com.jhlc.km.sb.model.BeautyList;
+import com.jhlc.km.sb.model.SModel;
+import com.jhlc.km.sb.utils.ServerUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.jhlc.km.sb.volley.IRequest;
+import com.jhlc.km.sb.volley.RequestJsonListener;
+import com.jhlc.km.sb.volley.RequestListener;
+import com.jhlc.km.sb.volley.RequestParams;
+
+import java.util.List;
+import java.util.Map;
+
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class TresureMdolImpl implements TresureModel {
+
+    private final String TAG = "TresureMdolImpl";
+    private Context mContext;
+
+    public TresureMdolImpl(Context mContext) {
+        this.mContext = mContext;
+    }
+
+    @Override
+    public void loadTresure(String url, RequestParams params, final onLoadListener listener) {
+        IRequest.post(mContext, url, params, new RequestListener() {
+            @Override
+            public void requestSuccess(String json) {
+                String responseBody = "{" +
+                        "\"beautylist\":" + json +"}";
+                BeautyList beautyList = new Gson().fromJson(responseBody,BeautyList.class);
+                listener.onSuccess(beautyList.getList());
+            }
+
+            @Override
+            public void requestError(VolleyError e) {
+                listener.onFailure("load beauty failure",e);
+            }
+        });
+    }
+
+    public interface onLoadListener {
+        void onSuccess(List<Beauty> beautyList);
+        void onFailure(String msg, Exception e);
+    }
+}

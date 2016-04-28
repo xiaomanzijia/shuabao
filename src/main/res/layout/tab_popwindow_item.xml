@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:id="@+id/llPopWindow"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:text="瓷器"
+        android:id="@+id/textSearchName"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/abc_action_bar_overflow_padding_end_material" />
+
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/dim_foreground_disabled_material_dark"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom">
+    </View>
+
+</LinearLayout>

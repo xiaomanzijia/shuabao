@@ -1,0 +1,23 @@
+package com.jhlc.km.sb.activity;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+
+import com.umeng.analytics.MobclickAgent;
+
+
+/**
+ * Created by licheng on 23/3/16.
+ */
+public  class BaseActivity extends AppCompatActivity {
+
+    public void initView(){}
+
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+}

@@ -1,0 +1,274 @@
+package com.jhlc.km.sb.activity;
+
+import android.Manifest;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.fragment.MeFragment;
+import com.jhlc.km.sb.fragment.ShuaBaoFragment;
+import com.jhlc.km.sb.receiver.DataRefreshReceiver;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.StringUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.umeng.analytics.MobclickAgent;
+import com.umeng.message.PushAgent;
+import com.umeng.update.UmengUpdateAgent;
+import com.umeng.update.UpdateConfig;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public class MainActivity extends BaseActivity implements ServerInterfaceHelper.Listenter  {
+
+    @Bind(R.id.rbtnShuabaao)
+    RadioButton rbtnShuabaao;
+    @Bind(R.id.rbtnTakePhoto)
+    RadioButton rbtnTakePhoto;
+    @Bind(R.id.rbtnMe)
+    RadioButton rbtnMe;
+    @Bind(R.id.radiogroup)
+    RadioGroup radiogroup;
+
+    private FragmentManager manager;
+    private FragmentTransaction transaction;
+    private Fragment shuabaoFragment;
+    private Fragment meFragment;
+    private RadioGroup radioGroup;
+
+    private boolean isQuit = false;
+    private final Timer timer = new Timer();
+    private DataRefreshReceiver refreshReceiver;
+
+    private ServerInterfaceHelper helper;
+    private final static String TAG = "MainActivity";
+
+    private static final int REQUEST_CAMERA = 0;
+    private View view;
+
+    @Override
+    public void initView() {
+        super.initView();
+        setSelect(0);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        view = findViewById(R.id.content);
+        ButterKnife.bind(this);
+        UpdateConfig.setDebug(true);
+        UmengUpdateAgent.setUpdateOnlyWifi(false);
+        UmengUpdateAgent.update(this);
+        Log.e(TAG,"uapdate0000000000000000000000000000000000");
+//        PushAgent mPushAgent = PushAgent.getInstance(this);
+//        mPushAgent.enable();
+//        PushAgent.getInstance(this).onAppStart();
+        initView();
+        registDataRefreshReceiver();
+        initUser(); //用户初始化
+    }
+
+    private void initUser() {
+        helper = new ServerInterfaceHelper(this,MainActivity.this);
+        String userId = PreferencesUtils.getString(MainActivity.this,Constants.PREFERENCES_USERID);
+        if(StringUtils.isBlank(userId)){
+            helper.initregist(TAG);
+        }
+    }
+
+
+    private void registDataRefreshReceiver() {
+        refreshReceiver = new DataRefreshReceiver(this);
+        IntentFilter filter = new IntentFilter(Constants.BROADCASTRECEIVER_DATA_REFRESH);
+        registerReceiver(refreshReceiver,filter);
+    }
+
+    private void setSelect(int position) {
+        manager = getSupportFragmentManager();
+        transaction = manager.beginTransaction();
+        Bundle bundle = new Bundle();
+        switch (position) {
+            case 0:
+                if (shuabaoFragment == null) {
+                    shuabaoFragment = new ShuaBaoFragment();
+                }
+                if (!shuabaoFragment.isAdded()) {
+                    bundle.putString("whichtab", "首页");
+                    shuabaoFragment.setArguments(bundle);
+                    transaction.replace(R.id.content, shuabaoFragment);
+                }
+                break;
+            case 1:
+                Intent takepic = new Intent(getApplicationContext(), TakePicAcitivity.class);
+                startActivity(takepic);
+//                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+//                        != PackageManager.PERMISSION_GRANTED) { //权限申请
+//                    Log.i(TAG,"拍照权限没有申请");
+//                    requestCameraPermission();
+//                }else {
+//                    Log.i(TAG,"拍照权限通过");
+////                    Intent takepic = new Intent(getApplicationContext(), TakePicAcitivity.class);
+////                    startActivity(takepic);
+//                }
+                break;
+            case 2:
+                if (meFragment == null) {
+                    meFragment = new MeFragment();
+                }
+                if (!meFragment.isAdded()) {
+                    bundle.putString("whichtab", "我的");
+                    meFragment.setArguments(bundle);
+                    transaction.replace(R.id.content, meFragment);
+                }
+                break;
+            default:
+                break;
+        }
+        transaction.commit();
+    }
+
+    private void requestCameraPermission() {
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.CAMERA)) {
+            Snackbar.make(view, R.string.permission_camera_rationale,
+                    Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.ok, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            ActivityCompat.requestPermissions(MainActivity.this,
+                                    new String[]{Manifest.permission.CAMERA},
+                                    REQUEST_CAMERA);
+                        }
+                    })
+                    .show();
+        } else {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
+                    REQUEST_CAMERA);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) { //权限申请结果返回处理
+
+        if (requestCode == REQUEST_CAMERA) {
+            // BEGIN_INCLUDE(permission_result)
+            // Received permission result for camera permission.
+            Log.i(TAG, "Received response for Camera permission request.");
+
+            // Check if the only required permission has been granted
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) { //权限申请通过
+                // Camera permission has been granted, preview can be displayed
+                Log.i(TAG, "CAMERA permission has now been granted. Showing preview.");
+                Log.i(TAG,"拍照权限申请通过,跳转到拍照界面");
+                Intent takepic = new Intent(getApplicationContext(), TakePicAcitivity.class);
+                startActivity(takepic);
+            } else {
+                Log.i(TAG, "CAMERA permission was NOT granted.");
+                Snackbar.make(view, R.string.permissions_not_granted,
+                        Snackbar.LENGTH_SHORT).show();
+            }
+            // END_INCLUDE(permission_result)
+
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (isQuit == false) {
+                isQuit = true;
+                ToastUtils.show(getApplicationContext(), "再次点击，确认退出");
+                TimerTask task = null;
+                task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        isQuit = false;
+                    }
+                };
+                timer.schedule(task, 2000);
+            } else {
+                finish();
+            }
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
+        return true;
+    }
+
+    @OnClick({R.id.rbtnShuabaao, R.id.rbtnTakePhoto, R.id.rbtnMe})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.rbtnShuabaao:
+                setSelect(0);
+                break;
+            case R.id.rbtnTakePhoto:
+                setSelect(1);
+                break;
+            case R.id.rbtnMe:
+                setSelect(2);
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(refreshReceiver);
+    }
+
+    @Override
+    public void success(Object object) {
+        if(object instanceof String && !StringUtils.isBlank((String) object)){
+            String userid = (String) object;
+            PreferencesUtils.putString(MainActivity.this,Constants.PREFERENCES_USERID,userid);
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+
+    }
+}

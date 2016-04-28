@@ -1,0 +1,59 @@
+package com.jhlc.km.sb.constants;
+
+import android.os.Environment;
+
+/**
+ * Created by licheng on 28/3/16.
+ */
+public class Constants {
+
+    //服务器接口地址
+    public final static String SERVER_URL = "http://120.26.95.62:9494/shuabao/ShuaBaoapi.do";
+
+    //阿里OSS服务器地址
+    public final static String OSS_URL = "http://120.26.95.62:9494/shuabao/ossServer";
+
+    //服务器成功返回status
+    public final static String STATUS_SUCCESS = "success";
+    public final static String STATUS_FAILURE = "error";
+
+    //服务器请求接口名称
+    public final static String INTERFACE_MSG_CODE = "sendMsgCode";//发送验证码
+    public final static String INTERFACE_REGIST = "regist";//用户注册
+    public final static String INTERFACE_LOGIN = "login";//用户登陆
+    public final static String INTERFACE_UPDATE_UERINFO = "updateUserInfo";//用户登陆
+
+    //服务器接口返回状态
+    public final static String INTERFACE_QUEST_FAILER = "请求失败";
+    public final static String INTERFACE_REGIST_SUCCESS = "注册成功";
+    public final static String INTERFACE_REGIST_FAILURE = "注册失败";
+    public final static String INTERFACE_MSG_CODE_SUCCESS = "验证码获取成功";
+    public final static String INTERFACE_MSG_CODE_FAILURE = "验证码获取失败";
+
+    //本地连续拍照图片预览文件夹地址
+    public final static String CaptureFilePath = Environment
+            .getExternalStorageDirectory() + "/DCIM/Camera/";
+
+    //判断用户是否登陆
+    public final static String PREFERENCES_IS_LOGIN = "PREFERENCES_IS_LOGIN";
+
+    //用户信息存储
+    public final static String PREFERENCES_USERID = "PREFERENCES_USERID";//用户ID
+    public final static String PREFERENCES_USER_CITY = "PREFERENCES_USER_CITY";//城市
+    public final static String PREFERENCES_USER_CCREATE_DATE = "PREFERENCES_USER_CCREATE_DATE";//创建时间
+    public final static String PREFERENCES_USER_MOBILE = "PREFERENCES_USER_MOBILE";//手机号码
+    public final static String PREFERENCES_USER_PROVINCE = "PREFERENCES_USER_PROVINCE";//所在省份
+    public final static String PREFERENCES_USER_PWD = "PREFERENCES_USER_PWD";//密码
+    public final static String PREFERENCES_USER_STATUS = "PREFERENCES_USER_STATUS";//登陆状态
+    public final static String PREFERENCES_USERNAME = "PREFERENCES_USERNAME";//用户名
+    public final static String PREFERENCES_USER_UUID = "PREFERENCES_USER_UUID";//用户唯一号码
+    public final static String PREFERENCES_USER_WECHAT_NUM = "PREFERENCES_USER_WECHAT_NUM";//用户微信号
+
+    //事件跳转判断
+    public final static String INTENT_TYPE = "INTENT_TYPE";
+    public final static String INTENT_TYPE_FORGET_PASSWORD = "FORGET_PASSWOED";
+    public final static String INTENT_TYPE_EDIT_USERINFO = "INTENT_TYPE_EDIT_USERINFO";
+    public final static String INTENT_TYPE_EDIT_USERINFO_USERNAME = "username";
+    public final static String INTENT_TYPE_EDIT_USERINFO_WECHATNO = "wechatno";
+
+}

@@ -1,0 +1,366 @@
+package com.jhlc.km.sb.fragment;
+
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TabHost;
+import android.widget.TextView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.activity.CommentThumbActivity;
+import com.jhlc.km.sb.activity.LoginActivity;
+import com.jhlc.km.sb.activity.OpinionFeedBackActivity;
+import com.jhlc.km.sb.activity.PersonnalProfileActivity;
+import com.jhlc.km.sb.activity.PublishTresureActivity;
+import com.jhlc.km.sb.activity.TresureDetailActivity;
+import com.jhlc.km.sb.adapter.TabTresureAdapter;
+import com.jhlc.km.sb.adapter.TabTresureMeFragmentAdapter;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.AntiqueBean;
+import com.jhlc.km.sb.model.CategoryBean;
+import com.jhlc.km.sb.receiver.DataRefreshReceiver;
+import com.jhlc.km.sb.tabtresure.presenter.TresurePresenter;
+import com.jhlc.km.sb.tabtresure.presenter.TresurePresenterImpl;
+import com.jhlc.km.sb.tabtresure.view.TresureView;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.SqliteUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.jhlc.km.sb.view.SearchPopupWindow;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class MeFragment extends BaseFragment implements SearchPopupWindow.onClickListener,TresureView,SwipeRefreshLayout.OnRefreshListener,ServerInterfaceHelper.Listenter {
+
+    @Bind(R.id.sdUserHead)
+    SimpleDraweeView sdUserHead;
+    @Bind(R.id.btnOpinionBack)
+    TextView btnOpinionBack;
+    @Bind(R.id.textUserName)
+    TextView textUserName;
+    @Bind(R.id.textAddress)
+    TextView textAddress;
+    @Bind(R.id.llUserName)
+    LinearLayout llUserName;
+    @Bind(R.id.textOpinion)
+    TextView textOpinion;
+    @Bind(R.id.rlMeUserHead)
+    RelativeLayout rlMeUserHead;
+    @Bind(R.id.llSearchCondition)
+    LinearLayout llSearchCondition;
+    @Bind(R.id.editSearch)
+    EditText editSearch;
+    @Bind(R.id.rlSearch)
+    RelativeLayout rlSearch;
+    @Bind(R.id.ibtnGo)
+    ImageButton ibtnGo;
+    @Bind(R.id.ibtnSearch)
+    ImageButton ibtnSearch;
+    @Bind(R.id.imgLocation)
+    ImageView imgLocation;
+    @Bind(R.id.tabRecyler)
+    RecyclerView tabRecyler;
+    @Bind(R.id.tabSwipeRefresh)
+    SwipeRefreshLayout tabSwipeRefresh;
+
+    private List<CategoryBean> menuList;
+    private SearchPopupWindow popupWindow;
+
+    private GridLayoutManager gridLayoutManager;
+    private int lastVisibleItem = 0;
+    private int pageIndex = 1;
+    private final String TAG = "MeFragment";
+    private List<AntiqueBean> antiqueBeanList;
+    private TresurePresenter presenter;
+    private TabTresureMeFragmentAdapter adapter;
+    private int pageSize = 8;
+
+    private boolean isLastPage = false;
+    
+    private ServerInterfaceHelper helper;
+
+    private SqliteUtils sqliteUtils;
+    
+    //变化的item位置
+    private int positionChanged = 0;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sqliteUtils = new SqliteUtils(getActivity());
+        menuList = sqliteUtils.getCategoryList();
+        popupWindow = new SearchPopupWindow(getActivity(), menuList);
+        popupWindow.setListener(this);
+        presenter = new TresurePresenterImpl(this,getActivity());
+        antiqueBeanList = new ArrayList<>();
+        helper = new ServerInterfaceHelper(this,getActivity());
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_layout_me, null);
+        ButterKnife.bind(this, view);
+        initView();
+
+        gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+
+        //设置下拉刷新
+        tabSwipeRefresh.setColorSchemeColors(R.color.refresh_blue,
+                R.color.refresh_green,R.color.refresh_green_blue,R.color.refresh_white);
+        tabSwipeRefresh.setOnRefreshListener(this);
+        //第一次进入界面时候加载进度条
+        tabSwipeRefresh.setProgressViewOffset(false, 0, (int) TypedValue
+                .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
+                        .getDisplayMetrics()));
+
+        tabRecyler.setLayoutManager(gridLayoutManager);
+
+        adapter = new TabTresureMeFragmentAdapter(antiqueBeanList,getActivity());
+
+
+        adapter.setListener(new TabTresureMeFragmentAdapter.onItenClickListener() {
+            @Override
+            public void onItemClick(View view, int position, String id,String name) {
+                Intent intent = new Intent(getActivity(), TresureDetailActivity.class);
+                intent.putExtra(Constants.INTENT_ANTIQUE_ID,id);
+                intent.putExtra(Constants.INTENT_ANTIQUE_NAME,name);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onDeleteClick(int position,String id) {
+                positionChanged = position;
+                helper.deleteAntique(TAG,id);
+            }
+
+            @Override
+            public void onEditClick(int position,String id) {
+                Intent intent = new Intent(getActivity(), PublishTresureActivity.class);
+                intent.putExtra(Constants.INTENT_TYPE_PUBLISH_TRESURE,Constants.INTENT_TYPE_PUBLISH_TRESURE_EDIT);
+                intent.putExtra(Constants.INTENT_MEFRAGMENT_PUBLISH_TRESURE_ID,id);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onShareClick(int position,String id) {
+                ToastUtils.show(getActivity(), "分享");
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        });
+
+        tabRecyler.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                        && lastVisibleItem + 1 == adapter.getItemCount()) {
+//                    swipeRefreshLayout.setRefreshing(true);
+                    // 此处在现实项目中，请换成网络请求数据代码，sendRequest .....
+                    Log.i("MeFragment","pageIndex:"+pageIndex);
+                    //根据类目网络请求数据
+                    if(!isLastPage){
+                        presenter.loadTresure(pageIndex,pageSize,"","",PreferencesUtils.getString(getActivity(),Constants.PREFERENCES_USER_LOGINID),"","");
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                lastVisibleItem = gridLayoutManager.findLastVisibleItemPosition();
+            }
+        });
+
+        tabRecyler.setAdapter(adapter);
+
+        return view;
+    }
+
+    @Override
+    public void initView() {
+        super.initView();
+        initUserView();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initUserView();
+        initRecylerView();
+    }
+
+    private void initRecylerView() {
+        if(PreferencesUtils.getBoolean(getActivity(),Constants.PREFERENCES_IS_LOGIN)){
+            tabSwipeRefresh.setVisibility(View.VISIBLE);
+            tabRecyler.setVisibility(View.VISIBLE);
+            onRefresh();
+        }else {
+            ToastUtils.show(getActivity(),"您还没登陆");
+            tabSwipeRefresh.setVisibility(View.GONE);
+            tabRecyler.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    @OnClick({R.id.btnOpinionBack, R.id.llSearchCondition, R.id.ibtnGo, R.id.ibtnSearch, R.id.textOpinion})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnOpinionBack:
+                Intent opinion = new Intent(getActivity(), OpinionFeedBackActivity.class);
+                startActivity(opinion);
+                break;
+            case R.id.llSearchCondition:
+                if (popupWindow.isShowing()) {
+                    popupWindow.dismiss();
+                } else {
+                    popupWindow.showAsDropDown(view);
+                }
+                break;
+            case R.id.ibtnGo:
+                if (PreferencesUtils.getBoolean(getActivity(), Constants.PREFERENCES_IS_LOGIN)) {
+                    Intent personal = new Intent(getActivity(), PersonnalProfileActivity.class);
+                    startActivity(personal);
+                } else {
+                    Intent login = new Intent(getActivity(), LoginActivity.class);
+                    startActivity(login);
+                }
+
+                break;
+            case R.id.ibtnSearch:
+                ToastUtils.show(getContext(), "搜索");
+                break;
+            case R.id.textOpinion:
+                Intent commentthumb = new Intent(getActivity(), CommentThumbActivity.class);
+                startActivity(commentthumb);
+                break;
+        }
+    }
+
+    private void initUserView() {
+        if (PreferencesUtils.getBoolean(getActivity(), Constants.PREFERENCES_IS_LOGIN)) {
+            sdUserHead.setImageURI(Uri.parse("http://shuabao.img-cn-hangzhou.aliyuncs.com/ar.jpg@100h"));
+            imgLocation.setVisibility(View.VISIBLE);
+            textAddress.setVisibility(View.VISIBLE);
+            textUserName.setText(PreferencesUtils.getString(getActivity(), Constants.PREFERENCES_USERNAME));
+            textAddress.setText(PreferencesUtils.getString(getActivity(), Constants.PREFERENCES_USER_PROVINCE
+                    + PreferencesUtils.getString(getActivity(), Constants.PREFERENCES_USER_CITY)));
+            textOpinion.setText("宝贝10件,被赞200次");
+        } else {
+            imgLocation.setVisibility(View.GONE);
+            textAddress.setVisibility(View.GONE);
+            textUserName.setText("去登陆");
+            textOpinion.setText("宝贝0件,被赞0次");
+        }
+    }
+
+    @Override
+    public void onClick(int position, String menuTitle,String menuId) {
+        ToastUtils.show(getActivity(), menuTitle);
+    }
+
+    @Override
+    public void onRefresh() {
+        pageIndex = 1;
+
+        Log.i(TAG,antiqueBeanList.size()+"");
+
+        if(antiqueBeanList != null || antiqueBeanList.size() > 0) {
+            antiqueBeanList.clear();
+        }
+        //根据类目网络请求数据
+        presenter.loadTresure(pageIndex,pageSize,"","",PreferencesUtils.getString(getActivity(),Constants.PREFERENCES_USERID),"","");
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void showProgress() {
+        if(pageIndex == 1){
+            tabSwipeRefresh.setRefreshing(false);
+        }else {
+            tabSwipeRefresh.setRefreshing(true);
+        }
+    }
+
+    @Override
+    public void addTresure(List<AntiqueBean> list) {
+        if(antiqueBeanList != null){
+//            adapter.setShowFooter(true);
+            if(antiqueBeanList == null){
+                antiqueBeanList = new ArrayList<>();
+            }
+            antiqueBeanList.addAll(list);
+            adapter.notifyDataSetChanged();
+            Log.i(TAG,"list大小:"+list.size());
+            //TODO:如果没有更多数据，隐藏footer
+            if(list == null || list.size() < pageSize){
+//                adapter.setShowFooter(false);
+                isLastPage = true;
+                Log.i(TAG,"没有更多数据了...");
+            }else {
+                isLastPage = false;
+                pageIndex++;
+            }
+        }
+    }
+
+    @Override
+    public void hideProgress() {
+        tabSwipeRefresh.setRefreshing(false);
+    }
+
+    @Override
+    public void showLoadFailMsg() {
+        if(pageIndex == 1) {
+//            adapter.setShowFooter(false);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void success(Object object) {
+        if(object instanceof String && object.equals(Constants.STATUS_SUCCESS)){
+            ToastUtils.show(getActivity(),"宝贝删除成功");
+            Log.i(TAG,"删除position:"+positionChanged);
+            adapter.notifyItemRemoved(positionChanged);
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+        
+    }
+}

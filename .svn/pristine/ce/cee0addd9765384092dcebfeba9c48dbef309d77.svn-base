@@ -1,0 +1,105 @@
+package com.jhlc.km.sb.activity;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.utils.ToastUtils;
+
+import java.io.File;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 28/3/16.
+ */
+public class PublishTresureActivity extends BaseActivity {
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.textTresureName)
+    TextView textTresureName;
+    @Bind(R.id.btnReport)
+    TextView btnReport;
+    @Bind(R.id.imgPublishTresure)
+    ImageView imgPublishTresure;
+    @Bind(R.id.editTresureDes)
+    EditText editTresureDes;
+    @Bind(R.id.textPublishPrice)
+    TextView textPublishPrice;
+    @Bind(R.id.textWeChatNum)
+    TextView textWeChatNum;
+    @Bind(R.id.rlWeChatNum)
+    RelativeLayout rlWeChatNum;
+    @Bind(R.id.textMobile)
+    TextView textMobile;
+    @Bind(R.id.rlMobile)
+    RelativeLayout rlMobile;
+
+    File pics[];
+    @Bind(R.id.ibtnWeChatForward)
+    ImageButton ibtnWeChatForward;
+    private int imgLength;
+
+    @Override
+    public void initView() {
+        super.initView();
+        textTresureName.setText("发布宝贝");
+        btnReport.setText("发布");
+        ibtnWeChatForward.setVisibility(View.INVISIBLE);
+        //从文件夹中读取图片
+        File file = new File(Constants.CaptureFilePath + "pictest/");
+        if (!file.exists()) {
+            file.mkdir();
+            Log.i("MainActivity", "no file");
+        } else {
+            pics = file.listFiles();
+            imgLength = pics.length;
+            Log.i("MainActivity", imgLength + "");
+        }
+        if(imgLength != 0){
+            showFistPicture();
+        }
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_publish_tresure_layout);
+        ButterKnife.bind(this);
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.btnReport, R.id.rlMobile})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnReport:
+                ToastUtils.show(getApplicationContext(), "发布宝贝");
+                break;
+            case R.id.rlMobile:
+                ToastUtils.show(getApplicationContext(), "手机号");
+                break;
+        }
+    }
+
+    private void showFistPicture() {
+        File file = pics[0];
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+        imgPublishTresure.setImageBitmap(bitmap);
+    }
+}

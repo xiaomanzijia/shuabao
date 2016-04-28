@@ -1,0 +1,95 @@
+package com.jhlc.km.sb.activity;
+
+import android.media.Image;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.utils.StatusBarCompat;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 24/3/16.
+ */
+public class UserInfoPageAcitivity extends BaseActivity {
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.sdUserHead)
+    SimpleDraweeView sdUserHead;
+    @Bind(R.id.btnFocus)
+    ImageButton btnFocus;
+    @Bind(R.id.textUserName)
+    TextView textUserName;
+    @Bind(R.id.textAddress)
+    TextView textAddress;
+    @Bind(R.id.textUserWeChatNum)
+    TextView textUserWeChatNum;
+    @Bind(R.id.textUserPhoneNum)
+    TextView textUserPhoneNum;
+    @Bind(R.id.llSearchCondition)
+    LinearLayout llSearchCondition;
+    @Bind(R.id.editSearch)
+    EditText editSearch;
+    @Bind(R.id.ibtnSearch)
+    ImageButton ibtnSearch;
+
+    @Override
+    public void initView() {
+        super.initView();
+        sdUserHead.setImageURI(Uri.parse("http://www.diandidaxue.com:8080/images/beauty/20160117105559.jpg"));
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_userinfo_page_layout);
+        ButterKnife.bind(this);
+        StatusBarCompat.compat(this,getResources().getColor(R.color.colorPrimary));
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.btnFocus, R.id.llSearchCondition, R.id.ibtnSearch})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnFocus:
+                ToastUtils.show(getApplicationContext(),"关注");
+                break;
+            case R.id.llSearchCondition:
+                ToastUtils.show(getApplicationContext(),"搜索条件");
+                break;
+            case R.id.ibtnSearch:
+                ToastUtils.show(getApplicationContext(),"搜索");
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+}

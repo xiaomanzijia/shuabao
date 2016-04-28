@@ -1,0 +1,92 @@
+package com.jhlc.km.sb.activity;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 24/3/16.
+ */
+public class OpinionFeedBackActivity extends BaseActivity {
+
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.textTresureName)
+    TextView textTresureName;
+    @Bind(R.id.btnReport)
+    TextView btnReport;
+    @Bind(R.id.testLableFeedback)
+    TextView testLableFeedback;
+    @Bind(R.id.editFeedbackQuestion)
+    EditText editFeedbackQuestion;
+    @Bind(R.id.editFeedbackMobile)
+    EditText editFeedbackMobile;
+    @Bind(R.id.btnFeedbackSubmit)
+    Button btnFeedbackSubmit;
+    @Bind(R.id.imageLablePhone)
+    ImageView imageLablePhone;
+    @Bind(R.id.btn_phone)
+    Button btnPhone;
+    @Bind(R.id.rlCustomerPhone)
+    RelativeLayout rlCustomerPhone;
+    @Bind(R.id.textLableCustomer)
+    TextView textLableCustomer;
+
+    @Override
+    public void initView() {
+        super.initView();
+        btnReport.setVisibility(View.GONE);
+        textTresureName.setText("意见反馈");
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_opinion_feedback_layout);
+        ButterKnife.bind(this);
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.btnFeedbackSubmit, R.id.btn_phone})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnFeedbackSubmit:
+                ToastUtils.show(getApplicationContext(),"提交");
+                break;
+            case R.id.btn_phone:
+                ToastUtils.show(getApplicationContext(),"客服电话");
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+}

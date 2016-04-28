@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
+    tools:context=".activity.UserInfoPageAcitivity"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:id="@+id/rlMeUserHead"
+        android:background="@color/colorPrimary"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/llBack"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:clickable="true">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/btn_feedback_backward"
+                android:id="@+id/btnBack"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/abc_action_bar_content_inset_material"
+                android:paddingTop="@dimen/abc_action_bar_content_inset_material"
+                android:paddingBottom="@dimen/abc_action_bar_content_inset_material"
+                android:clickable="false" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/btn_back"
+                android:textColor="@color/white"
+                android:layout_height="wrap_content"
+                android:paddingRight="@dimen/abc_action_bar_content_inset_material"
+                android:layout_toRightOf="@+id/btnBack"
+                android:id="@+id/textBack"
+                />
+
+        </LinearLayout>
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/sdUserHead"
+            fresco:roundAsCircle="true"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/abc_action_bar_stacked_max_height"
+            android:clickable="true" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:id="@+id/btnFocus"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ibtn_focus_backgronnd"
+            android:background="@color/transparent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|right"
+            android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:id="@+id/llUserName"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/sdUserHead">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/textUserName"
+                android:text="付旭东"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/abc_action_bar_overflow_padding_start_material"
+                android:textColor="@color/white" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:src="@drawable/btn_dingwei"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/abc_action_bar_overflow_padding_start_material" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="浙江金华"
+                android:id="@+id/textAddress"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dim_foreground_disabled_material_dark" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@+id/llUserName"
+            android:id="@+id/llContact"
+            android:paddingTop="@dimen/abc_action_bar_overflow_padding_start_material"
+            android:paddingBottom="@dimen/abc_action_bar_content_inset_material"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:src="@drawable/image_userinfopage_wechat"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/abc_control_corner_material" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/textUserWeChatNum"
+                android:text="lichengfong"
+                android:textColor="@color/white"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:src="@drawable/image_userinfopage_phone"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/abc_action_bar_content_inset_material"
+                android:layout_marginRight="@dimen/abc_control_corner_material" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/textUserPhoneNum"
+                android:text="18966045735"
+                android:textColor="@color/white"
+                android:layout_height="wrap_content" />
+
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <include layout="@layout/tab_me_search_condition" android:id="@+id/includeMeSearch"></include>
+
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/dim_foreground_disabled_material_dark"
+        android:layout_height="1dp"></View>
+
+    <!--<android.support.v4.widget.SwipeRefreshLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:id="@+id/tabSwipeRefresh"-->
+        <!--android:layout_height="match_parent">-->
+
+        <!--<android.support.v7.widget.RecyclerView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:id="@+id/tabRecyler"-->
+            <!--android:layout_height="wrap_content">-->
+        <!--</android.support.v7.widget.RecyclerView>-->
+
+    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
+
+
+</LinearLayout>

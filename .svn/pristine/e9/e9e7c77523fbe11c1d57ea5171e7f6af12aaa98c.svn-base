@@ -1,0 +1,188 @@
+package com.jhlc.km.sb.tabtresure.widget;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.activity.TresureDetailActivity;
+import com.jhlc.km.sb.adapter.TabTresureAdapter;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.AntiqueBean;
+import com.jhlc.km.sb.model.Beauty;
+import com.jhlc.km.sb.receiver.DataRefreshReceiver;
+import com.jhlc.km.sb.tabtresure.presenter.TresurePresenter;
+import com.jhlc.km.sb.tabtresure.presenter.TresurePresenterImpl;
+import com.jhlc.km.sb.tabtresure.view.TresureView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class TabSbNewFragment extends Fragment implements TresureView,SwipeRefreshLayout.OnRefreshListener,DataRefreshReceiver.RefreshListener{
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView recyclerView;
+    private GridLayoutManager gridLayoutManager;
+    private int lastVisibleItem = 0;
+    private int pageIndex = 1;
+    private final String TAG = "TabPageFragment";
+    private List<AntiqueBean> antiqueBeanList;
+    private TresurePresenter presenter;
+    private TabTresureAdapter adapter;
+    private int pageSize = 8;
+
+    private boolean isLastPage = false;
+
+    private DataRefreshReceiver refreshReceiver;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        presenter = new TresurePresenterImpl(this,getActivity());
+        antiqueBeanList = new ArrayList<>();
+        refreshReceiver = DataRefreshReceiver.getInstance(getActivity());
+        refreshReceiver.setRefreshListener(this);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View contextView = inflater.inflate(R.layout.tab_fragment_item,null);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) contextView.findViewById(R.id.tabSwipeRefresh);
+        recyclerView = (RecyclerView) contextView.findViewById(R.id.tabRecyler);
+
+        gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+
+        //设置下拉刷新
+        swipeRefreshLayout.setColorSchemeColors(R.color.refresh_blue,
+                R.color.refresh_green,R.color.refresh_green_blue,R.color.refresh_white);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        //第一次进入界面时候加载进度条
+        swipeRefreshLayout.setProgressViewOffset(false, 0, (int) TypedValue
+                .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
+                        .getDisplayMetrics()));
+
+        recyclerView.setLayoutManager(gridLayoutManager);
+
+        adapter = new TabTresureAdapter(antiqueBeanList,getActivity());
+
+
+        adapter.setListener(new TabTresureAdapter.onItenClickListener() {
+            @Override
+            public void onItemClick(View view, int position, String id,String name) {
+                Intent intent = new Intent(getActivity(), TresureDetailActivity.class);
+                intent.putExtra(Constants.INTENT_ANTIQUE_ID,id);
+                intent.putExtra(Constants.INTENT_ANTIQUE_NAME,name);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        });
+
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                        && lastVisibleItem + 1 == adapter.getItemCount()) {
+//                    swipeRefreshLayout.setRefreshing(true);
+                    // 此处在现实项目中，请换成网络请求数据代码，sendRequest .....
+                    Log.i("pageIndex",pageIndex+"");
+                    //根据类目网络请求数据
+                    if(!isLastPage){
+                        presenter.loadTresure(pageIndex,pageSize,"","","","","");
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                lastVisibleItem = gridLayoutManager.findLastVisibleItemPosition();
+            }
+        });
+
+        recyclerView.setAdapter(adapter);
+
+        onRefresh();
+
+        return contextView;
+    }
+
+    @Override
+    public void showProgress() {
+        if(pageIndex == 1){
+            swipeRefreshLayout.setRefreshing(false);
+        }else {
+            swipeRefreshLayout.setRefreshing(true);
+        }
+    }
+
+    @Override
+    public void addTresure(List<AntiqueBean> list) {
+        if(antiqueBeanList != null){
+//            adapter.setShowFooter(true);
+            if(antiqueBeanList == null){
+                antiqueBeanList = new ArrayList<>();
+            }
+            antiqueBeanList.addAll(list);
+            adapter.notifyDataSetChanged();
+            Log.i(TAG,"list大小:"+list.size());
+            //TODO:如果没有更多数据，隐藏footer
+            if(list == null || list.size() < pageSize){
+//                adapter.setShowFooter(false);
+                isLastPage = true;
+                Log.i(TAG,"没有更多数据了...");
+            }else {
+                isLastPage = false;
+                pageIndex++;
+            }
+        }
+    }
+
+    @Override
+    public void hideProgress() {
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void showLoadFailMsg() {
+        if(pageIndex == 1) {
+//            adapter.setShowFooter(false);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        pageIndex = 1;
+        if(antiqueBeanList != null || antiqueBeanList.size() > 0) {
+            antiqueBeanList.clear();
+        }
+        //根据类目网络请求数据
+        presenter.loadTresure(pageIndex,pageSize,"","","","","");
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void refresh(Boolean isChanged) {
+        if(isChanged){
+            adapter.notifyDataSetChanged();
+        }
+    }
+}

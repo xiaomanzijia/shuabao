@@ -1,0 +1,140 @@
+package com.jhlc.km.sb.model;
+
+import com.google.gson.annotations.SerializedName;
+
+/**
+ * Created by licheng on 28/3/16.
+ */
+public class UserBean {
+    @SerializedName("city")
+    private String city;
+    @SerializedName("createdate")
+    private String createdate;
+    @SerializedName("headimgurl")
+    private String headimgurl;
+    @SerializedName("id")
+    private String id;
+    @SerializedName("loginaccount")
+    private String loginaccount;
+    @SerializedName("logintype")
+    private String logintype;
+    @SerializedName("mobile")
+    private String mobile;
+    @SerializedName("province")
+    private String province;
+    @SerializedName("psw")
+    private String psw;
+    @SerializedName("status")
+    private String status;
+    @SerializedName("username")
+    private String username;
+    @SerializedName("uuid")
+    private String uuid;
+    @SerializedName("wechatno")
+    private String wechatno;
+
+    public String getLoginaccount() {
+        return loginaccount;
+    }
+
+    public void setLoginaccount(String loginaccount) {
+        this.loginaccount = loginaccount;
+    }
+
+    public String getLogintype() {
+        return logintype;
+    }
+
+    public void setLogintype(String logintype) {
+        this.logintype = logintype;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCreatedate() {
+        return createdate;
+    }
+
+    public void setCreatedate(String createdate) {
+        this.createdate = createdate;
+    }
+
+    public String getHeadimgurl() {
+        return headimgurl;
+    }
+
+    public void setHeadimgurl(String headimgurl) {
+        this.headimgurl = headimgurl;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public String getPsw() {
+        return psw;
+    }
+
+    public void setPsw(String psw) {
+        this.psw = psw;
+    }
+
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getWechatno() {
+        return wechatno;
+    }
+
+    public void setWechatno(String wechatno) {
+        this.wechatno = wechatno;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+}

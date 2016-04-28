@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:padding="@dimen/abc_action_bar_overflow_padding_end_material"
+    android:background="@color/white"
+    android:layout_height="?attr/actionBarSize"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:hint="@string/reportdetail_comment"
+        android:layout_height="wrap_content"
+        android:background="@drawable/reportdetail_comment_input"
+        android:textColor="@color/bright_foreground_disabled_material_light"
+        android:id="@+id/editComment"
+        android:paddingLeft="@dimen/edit_comment_text_hint"
+        android:paddingTop="@dimen/edit_search_image"
+        android:paddingBottom="@dimen/edit_search_image"
+        android:paddingRight="@dimen/edit_search_text_hint"
+        android:textColorHint="@color/bright_foreground_disabled_material_light"
+        android:layout_weight="2"
+        android:singleLine="true"
+        android:layout_toLeftOf="@+id/btnSentComment"
+        android:layout_centerVertical="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:text="发送"
+        android:id="@+id/btnSentComment"
+        android:layout_height="wrap_content"
+        android:layout_weight="6"
+        android:layout_marginRight="@dimen/abc_action_bar_overflow_padding_start_material"
+        android:layout_marginLeft="@dimen/abc_action_bar_overflow_padding_start_material"
+        android:layout_alignParentRight="false"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/btnThumb" />
+
+    <Button
+        android:layout_width="@dimen/btnWidth"
+        android:text="赞"
+        android:id="@+id/btnThumb"
+        android:layout_height="wrap_content"
+        android:layout_weight="6"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" />
+
+</RelativeLayout>

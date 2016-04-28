@@ -1,0 +1,145 @@
+package com.jhlc.km.sb.wxapi;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.SbApplication;
+import com.jhlc.km.sb.common.BitmapCache;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.WeChatOpenIdBean;
+import com.jhlc.km.sb.model.WeChatUserInfoBean;
+import com.jhlc.km.sb.utils.ListUtils;
+import com.jhlc.km.sb.utils.StringUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.jhlc.km.sb.volley.IRequest;
+import com.jhlc.km.sb.volley.RequestJsonListener;
+import com.jhlc.km.sb.volley.RequestListener;
+import com.tencent.mm.sdk.modelbase.BaseReq;
+import com.tencent.mm.sdk.modelbase.BaseResp;
+import com.tencent.mm.sdk.modelmsg.SendAuth;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
+
+import java.util.List;
+
+/**
+ * Created by licheng on 11/4/16.
+ */
+public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
+
+    private final static String TAG = "WXEntryActivity";
+    private IWXAPI api;
+
+    private RequestQueue requestQueue = Volley.newRequestQueue(SbApplication
+            .getContext());
+
+    private ImageView imageView;
+    private TextView tvUsername;
+
+    private BitmapCache bitmapCache;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_wxentry_layout);
+
+        imageView = (ImageView) findViewById(R.id.imgEntry);
+        tvUsername = (TextView) findViewById(R.id.textWeChatName);
+
+        api = ((SbApplication)getApplication()).api;
+
+        //将应用id注册到微信
+//        api = WXAPIFactory.createWXAPI(getApplicationContext(), Constants.WeChat_APP_ID,true);
+//        api.registerApp(Constants.WeChat_APP_ID);
+
+        api.handleIntent(getIntent(), this);//在WXEntryActivity中将接收到的intent及
+                                            // 实现了IWXAPIEventHandler接口的对象传递给IWXAPI接口的handleIntent方法
+
+        bitmapCache = new BitmapCache();
+
+    }
+
+    @Override
+    public void onReq(BaseReq baseReq) { //微信发送的请求将回调到onReq方法
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        api.handleIntent(intent, this);
+    }
+
+    @Override
+    public void onResp(BaseResp baseResp) { //发送到微信请求的响应结果将回调到onResp方法
+        if(baseResp instanceof SendAuth.Resp){
+            SendAuth.Resp newresp = (SendAuth.Resp) baseResp;
+            String code = newresp.code; //获取微信返回的code
+            Log.i(TAG,"code:"+code);
+            if(!StringUtils.isBlank(code)){
+                //根据code获取access_token
+                String url = "https://api.weixin.qq.com/sns/oauth2/access_token?" +
+                        "appid="+Constants.WeChat_APP_ID+"&secret="+Constants.WeChat_APP_SECRET+"&code="+code+"&grant_type=authorization_code";
+                Log.i(TAG,url);
+                IRequest.get(WXEntryActivity.this, url, WeChatOpenIdBean.class, new RequestJsonListener<WeChatOpenIdBean>() {
+                    @Override
+                    public void requestSuccess(WeChatOpenIdBean result) {
+                        if(result != null){
+                            String accessToken = result.getAccess_token();
+                            String openid = result.getOpenid();
+                            Log.i(TAG,"access_token:"+accessToken);
+                            Log.i(TAG,"openid:"+openid);
+                            final String wechatUserInfoUrl = "https://api.weixin.qq.com/sns/userinfo?" +
+                                    "access_token="+accessToken+"&openid="+openid;
+                            IRequest.get(WXEntryActivity.this, wechatUserInfoUrl, WeChatUserInfoBean.class, new RequestJsonListener<WeChatUserInfoBean>() {
+                                @Override
+                                public void requestSuccess(WeChatUserInfoBean result) {
+                                    Log.i(TAG,"nickname:"+result.getNickname());
+                                    Log.i(TAG,"province:"+result.getProvince());
+                                    String headimgurl = result.getHeadimgurl();
+                                    tvUsername.setText(result.getNickname());
+                                    try {
+                                        String wechatimgurl = headimgurl.substring(0,headimgurl.lastIndexOf("/"))+Constants.WECHAT_IMAGE_SIZE64;
+                                        Log.i(TAG,"headimgurl:" + wechatimgurl);
+                                        imageLoader.get(wechatimgurl,listener,200,200);
+                                    }catch (Exception e){}
+                                }
+
+                                @Override
+                                public void requestError(VolleyError e) {
+
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void requestError(VolleyError e) {
+
+                    }
+                });
+            }
+        }
+    }
+
+    ImageLoader imageLoader = new ImageLoader(requestQueue, bitmapCache);
+
+    ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView,
+            R.drawable.image_userinfopage_phone,R.drawable.image_userinfopage_wechat);
+
+
+}

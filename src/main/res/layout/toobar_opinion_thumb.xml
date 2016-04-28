@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorPrimary"
+    android:layout_height="?attr/actionBarSize">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/llBack"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_centerVertical="true">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/btn_feedback_backward"
+            android:id="@+id/btnBack"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/abc_action_bar_content_inset_material"
+            android:paddingTop="@dimen/abc_action_bar_content_inset_material"
+            android:paddingBottom="@dimen/abc_action_bar_content_inset_material" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/btn_back"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/abc_action_bar_content_inset_material"
+            android:layout_toRightOf="@+id/btnBack"
+            android:id="@+id/textBack"
+            />
+
+    </LinearLayout>
+
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="?attr/actionBarSize"
+        app:tabIndicatorColor="@color/colorMainRed"
+        app:tabIndicatorHeight="@dimen/tabIndicatorHeight"
+        app:tabTextColor="@color/white"
+        app:tabSelectedTextColor="@color/white"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>

@@ -1,0 +1,303 @@
+package com.jhlc.km.sb.tabtresure.widget;
+
+import android.app.Dialog;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.activity.TresureDetailActivity;
+import com.jhlc.km.sb.adapter.TabTresureAdapter;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.AntiqueBean;
+import com.jhlc.km.sb.receiver.DataRefreshReceiver;
+import com.jhlc.km.sb.tabtresure.presenter.TresurePresenter;
+import com.jhlc.km.sb.tabtresure.presenter.TresurePresenterImpl;
+import com.jhlc.km.sb.tabtresure.view.TresureView;
+import com.jhlc.km.sb.utils.ListUtils;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.StringUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class TabSbNewFragment extends Fragment implements TresureView, SwipeRefreshLayout.OnRefreshListener, DataRefreshReceiver.RefreshListener {
+    private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView textNotice;
+    private LinearLayout llNotice;
+    private GridLayoutManager gridLayoutManager;
+    private int lastVisibleItem = 0;
+    private int pageIndex = 1;
+    private final String TAG = "TabPageFragment";
+    private List<AntiqueBean> antiqueBeanList;
+    private TresurePresenter presenter;
+    private TabTresureAdapter adapter;
+    private int pageSize = 8;
+
+    private boolean isLastPage = false;
+
+    private DataRefreshReceiver refreshReceiver;
+
+    private String intent_fragment_type; //判断fragment
+
+    private Dialog progressDialog;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        presenter = new TresurePresenterImpl(this, getActivity());
+        antiqueBeanList = new ArrayList<>();
+        refreshReceiver = DataRefreshReceiver.getInstance(getActivity());
+        refreshReceiver.setRefreshListener(this);
+        intent_fragment_type = getArguments().getString(Constants.INTENT_FRAGMENT_TYPE);
+        initDialog();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View contextView = inflater.inflate(R.layout.tab_fragment_item, null);
+
+        recyclerView = (RecyclerView) contextView.findViewById(R.id.tabRecyler);
+        swipeRefreshLayout = (SwipeRefreshLayout) contextView.findViewById(R.id.tabSwipeRefresh);
+        llNotice = (LinearLayout) contextView.findViewById(R.id.llNotice);
+        textNotice = (TextView) contextView.findViewById(R.id.textNotice);
+
+        gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+
+        //设置下拉刷新
+        swipeRefreshLayout.setColorSchemeColors(R.color.refresh_blue,
+                R.color.refresh_green, R.color.refresh_green_blue, R.color.refresh_white);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        //第一次进入界面时候加载进度条
+        swipeRefreshLayout.setProgressViewOffset(false, 0, (int) TypedValue
+                .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
+                        .getDisplayMetrics()));
+
+        recyclerView.setLayoutManager(gridLayoutManager);
+
+        adapter = new TabTresureAdapter(antiqueBeanList, getActivity());
+
+
+        adapter.setListener(new TabTresureAdapter.onItenClickListener() {
+            @Override
+            public void onItemClick(View view, int position, String id, String name) {
+                Intent intent = new Intent(getActivity(), TresureDetailActivity.class);
+                intent.putExtra(Constants.INTENT_ANTIQUE_ID, id);
+                intent.putExtra(Constants.INTENT_ANTIQUE_NAME, name);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        });
+
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                        && lastVisibleItem + 1 == adapter.getItemCount()) {
+//                    swipeRefreshLayout.setRefreshing(true);
+                    // 此处在现实项目中，请换成网络请求数据代码，sendRequest .....
+                    Log.i("pageIndex", pageIndex + "");
+                    //根据类目网络请求数据
+                    if (!isLastPage) {
+                        if (!StringUtils.isBlank(intent_fragment_type)) {
+                            switch (intent_fragment_type) {
+                                case Constants.INTENT_FRAGMENT_TYPE_NEWS:
+                                    presenter.loadTresure(pageIndex, pageSize, "", "", "", "", "");
+                                    break;
+                                case Constants.INTENT_FRAGMENT_TYPE_FOCUSED:
+                                    if(PreferencesUtils.getBoolean(getActivity(),Constants.PREFERENCES_IS_LOGIN)){
+                                        presenter.loadTresureFocused(pageIndex, pageSize);
+                                    }else {
+                                        llNotice.setVisibility(View.VISIBLE);
+                                        textNotice.setText(Constants.TAG_FRAGMENT_LOGIN_NOTICE);
+                                    }
+                                    break;
+                                case Constants.INTENT_FRAGMENT_TYPE_COLLECT:
+                                    if(PreferencesUtils.getBoolean(getActivity(),Constants.PREFERENCES_IS_LOGIN)){
+                                        presenter.loadTresureCollect(pageIndex, pageSize);
+                                    }else {
+                                        llNotice.setVisibility(View.VISIBLE);
+                                        textNotice.setText(Constants.TAG_FRAGMENT_LOGIN_NOTICE);
+                                    }
+                                    break;
+                                default:
+                                    break;
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                lastVisibleItem = gridLayoutManager.findLastVisibleItemPosition();
+            }
+        });
+
+        recyclerView.setAdapter(adapter);
+
+        return contextView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        onRefresh();
+    }
+
+    @Override
+    public void showProgress() {
+        if (pageIndex == 1) {
+            swipeRefreshLayout.setRefreshing(false);
+        } else {
+            swipeRefreshLayout.setRefreshing(true);
+        }
+    }
+
+    @Override
+    public void addTresure(List<AntiqueBean> list) {
+        if(pageIndex == 1 && ListUtils.isEmpty(list)){
+            recyclerView.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
+            llNotice.setVisibility(View.VISIBLE);
+            switch (intent_fragment_type) {
+                case Constants.INTENT_FRAGMENT_TYPE_NEWS:
+                    textNotice.setText(Constants.TAG_FRAGMENT_NEWS);
+                    break;
+                case Constants.INTENT_FRAGMENT_TYPE_FOCUSED:
+                    textNotice.setText(Constants.TAG_FRAGMENT_FOCUSED);
+                    break;
+                case Constants.INTENT_FRAGMENT_TYPE_COLLECT:
+                    textNotice.setText(Constants.TAG_FRAGMENT_COLLECT);
+                    break;
+                default:
+                    break;
+            }
+        }else if(!ListUtils.isEmpty(list)){
+            recyclerView.setVisibility(View.VISIBLE);
+            llNotice.setVisibility(View.GONE);
+
+            if (antiqueBeanList != null) {
+//            adapter.setShowFooter(true);
+
+                antiqueBeanList.addAll(list);
+
+                adapter.notifyDataSetChanged();
+
+                if(list.size() < pageSize){
+                    isLastPage = true;
+                }else {
+                    isLastPage = false;
+                    pageIndex ++;
+                }
+            }
+        }else {
+            isLastPage = true;
+        }
+        progressDialog.dismiss();
+    }
+
+    @Override
+    public void hideProgress() {
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void showLoadFailMsg() {
+        if (pageIndex == 1) {
+//            adapter.setShowFooter(false);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        progressDialog.show();
+        pageIndex = 1;
+        if (!ListUtils.isEmpty(antiqueBeanList)) {
+            antiqueBeanList.clear();
+        }
+        //根据类目网络请求数据
+        if (!StringUtils.isBlank(intent_fragment_type)) {
+            switch (intent_fragment_type) {
+                case Constants.INTENT_FRAGMENT_TYPE_NEWS:
+                    presenter.loadTresure(pageIndex, pageSize, "", "", "", "", "");
+                    break;
+                case Constants.INTENT_FRAGMENT_TYPE_FOCUSED:
+                    if(PreferencesUtils.getBoolean(getActivity(),Constants.PREFERENCES_IS_LOGIN)){
+                        presenter.loadTresureFocused(pageIndex, pageSize);
+                    }else {
+                        initNoLoginView();
+                    }
+
+                    break;
+                case Constants.INTENT_FRAGMENT_TYPE_COLLECT:
+                    if(PreferencesUtils.getBoolean(getActivity(),Constants.PREFERENCES_IS_LOGIN)){
+                        presenter.loadTresureCollect(pageIndex, pageSize);
+                    }else {
+                        initNoLoginView();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    private void initNoLoginView(){
+        swipeRefreshLayout.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+        llNotice.setVisibility(View.VISIBLE);
+        textNotice.setText(Constants.TAG_FRAGMENT_LOGIN_NOTICE);
+    }
+
+    @Override
+    public void refresh(Boolean isChanged) {
+        if (isChanged) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    private void initDialog() {
+        progressDialog = new Dialog(getActivity(), R.style.progress_dialog);
+        progressDialog.setContentView(R.layout.dialog);
+        progressDialog.setCancelable(true);
+        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        TextView msg = (TextView) progressDialog.findViewById(R.id.id_tv_loadingmsg);
+        msg.setText("加载中...");
+    }
+}

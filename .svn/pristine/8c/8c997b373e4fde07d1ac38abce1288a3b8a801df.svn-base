@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    tools:showIn="@layout/activity_publish_tresure_layout"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/activity_toolbar_layout"></include>
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:id="@+id/progressImgUpload"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:max="100"
+        android:progress="0"
+        android:layout_height="wrap_content" />
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@color/white"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="@dimen/space_100"
+            android:id="@+id/imgPublishTresure"
+            android:layout_height="@dimen/space_100"
+            android:layout_margin="@dimen/abc_action_bar_content_inset_material" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/editTresureDes"
+            android:background="@color/white"
+            android:hint="@string/publish_tresure_hint_introduce"
+            android:layout_height="@dimen/space_100"
+            android:layout_toRightOf="@+id/imgPublishTresure"
+            android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+            android:layout_marginRight="@dimen/abc_action_bar_content_inset_material"
+            android:layout_marginBottom="@dimen/abc_action_bar_content_inset_material"
+            android:inputType="textMultiLine"
+            android:maxLines="8"
+            android:minLines="3"
+            android:textColor="@color/dim_foreground_disabled_material_light"
+            android:textColorHint="@color/dim_foreground_disabled_material_light"
+            android:gravity="start" />
+
+    </RelativeLayout>
+
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:hint="@string/publish_tresure_edit_price_hint"
+        android:layout_height="wrap_content"
+        android:background="@drawable/search_input"
+        android:textColor="@color/colorAccent"
+        android:id="@+id/editPrice"
+        android:textColorHint="@color/bright_foreground_disabled_material_light"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginTop="@dimen/item_line_margin_top" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/search_input"
+        android:layout_marginTop="@dimen/item_line_margin_top"
+        android:id="@+id/rlType">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/publish_tresure_text_type"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_size18"
+            android:padding="@dimen/abc_action_bar_content_inset_material"
+            android:id="@+id/textTypeLable" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/textType"
+            android:text=""
+            android:textSize="@dimen/text_size18"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="@dimen/abc_action_bar_content_inset_material" />
+    </RelativeLayout>
+
+
+
+
+
+
+</LinearLayout>

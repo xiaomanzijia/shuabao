@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="@layout/activity_login_layout"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:id="@+id/editMobile"
+        android:hint="@string/login_edit_mobile"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+        android:inputType="number"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:textColor="@color/dim_foreground_disabled_material_light"
+        android:textColorHint="@color/dim_foreground_disabled_material_light"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:id="@+id/editPassword"
+        android:hint="@string/login_edit_password"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:layout_marginTop="@dimen/item_line_margin_top"
+        android:inputType="number"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:textColor="@color/dim_foreground_disabled_material_light"
+        android:textColorHint="@color/dim_foreground_disabled_material_light"
+        android:layout_below="@+id/editMobile" />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="@string/login_btn_loging"
+        android:background="@drawable/btn_search_background"
+        android:id="@+id/btnLogin"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editPassword"
+        android:layout_marginLeft="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginRight="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginBottom="@dimen/abc_action_bar_content_inset_material" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/btnForgetPassword"
+        android:textColor="@color/colorAccent"
+        android:layout_below="@+id/btnLogin"
+        android:text="@string/login_text_forgetpassword"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/btnRegist"
+        android:layout_below="@+id/btnLogin"
+        android:textColor="@color/colorAccent"
+        android:text="@string/login_text_regist"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:padding="@dimen/abc_action_bar_content_inset_material" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="@string/login_text_compaire_site"
+        android:layout_below="@+id/btnRegist"
+        android:id="@+id/textLableCompaireSite"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/abc_action_bar_stacked_max_height" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/textLableCompaireSite"
+        android:id="@+id/llCompaireSite"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:id="@+id/ibtnWeChat"
+            android:background="@color/transparent"
+            android:src="@drawable/ibtn_wechat_regist"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/abc_action_bar_overflow_padding_end_material" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:id="@+id/ibtnQQ"
+            android:background="@color/transparent"
+            android:src="@drawable/ibtn_qq_regist"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/abc_action_bar_overflow_padding_end_material" />
+
+    </LinearLayout>
+
+</RelativeLayout>

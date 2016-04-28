@@ -1,0 +1,282 @@
+package com.jhlc.km.sb.fragment;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.adapter.CommentHotNewAdapter;
+import com.jhlc.km.sb.adapter.TabCommentHotNewAdapter;
+import com.jhlc.km.sb.adapter.TabCommentThumbAdapter;
+import com.jhlc.km.sb.antiquedetail.presenter.AntiqueDetailPresenter;
+import com.jhlc.km.sb.antiquedetail.presenter.AntiqueDetailPresenterImpl;
+import com.jhlc.km.sb.antiquedetail.view.AntiqueDetailView;
+import com.jhlc.km.sb.commentthumb.presenter.CommentThumbPresenter;
+import com.jhlc.km.sb.commentthumb.presenter.CommentThumbPresenterImpl;
+import com.jhlc.km.sb.commentthumb.view.CommentThumbView;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.AntiqueDetailBean;
+import com.jhlc.km.sb.model.AntiqueDetailServerModel;
+import com.jhlc.km.sb.model.CommentBean;
+import com.jhlc.km.sb.model.CommentThumbBean;
+import com.jhlc.km.sb.model.ImageBean;
+import com.jhlc.km.sb.utils.ListUtils;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.ButterKnife;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class TabCommentHotNewFragment extends Fragment implements AntiqueDetailView,SwipeRefreshLayout.OnRefreshListener,ServerInterfaceHelper.Listenter {
+
+    private RecyclerView tabRecyler;
+    private SwipeRefreshLayout tabSwipeRefresh;
+    private AntiqueDetailPresenter presenter;
+    private int pageSize = 8;
+    private int pageIndex = 1;
+    private String fragementType;
+    private TabCommentHotNewAdapter adapter;
+    private List<CommentBean> commentBeanHotList;
+    private List<CommentBean> commentBeanNewList;
+    private LinearLayoutManager linearLayoutManager;
+    private int lastVisibleItem = 0;
+    private boolean isLastPage = false;
+    private final static String TAG = "TabCommentHotNewFragment";
+
+    private int antiqueid;
+
+    private ServerInterfaceHelper helper;
+
+    private int positionChanged = 0;//adapter受影响的item位置
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        fragementType = getArguments().getString(Constants.INTENT_FRAGMENT_COMMENTTHUMB_TYPE);
+        antiqueid = Integer.valueOf(getArguments().getString(Constants.INTENT_TRESUREDETAIL_COMMENTHOTNEW_TRESREID));
+        presenter = new AntiqueDetailPresenterImpl(getActivity(),this);
+        commentBeanHotList = new ArrayList<>();
+        commentBeanNewList = new ArrayList<>();
+        helper = new ServerInterfaceHelper(this,getActivity());
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_comment_thumb_layout, null);
+
+        tabRecyler = (RecyclerView) view.findViewById(R.id.tabRecyler);
+        tabSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.tabSwipeRefresh);
+
+        linearLayoutManager = new LinearLayoutManager(getActivity());
+
+        //设置下拉刷新
+        tabSwipeRefresh.setColorSchemeColors(R.color.refresh_blue,
+                R.color.refresh_green, R.color.refresh_green_blue, R.color.refresh_white);
+        tabSwipeRefresh.setOnRefreshListener(this);
+        //第一次进入界面时候加载进度条
+        tabSwipeRefresh.setProgressViewOffset(false, 0, (int) TypedValue
+                .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
+                        .getDisplayMetrics()));
+
+        tabRecyler.setLayoutManager(linearLayoutManager);
+
+        switch (fragementType) {
+            case Constants.INTENT_FRAGMENT_TYPE_COMMENT_NEW: //最新评论
+                adapter = new TabCommentHotNewAdapter(commentBeanNewList, getActivity(), fragementType);
+                break;
+            case Constants.INTENT_FRAGMENT_TYPE_COMMENT_HOT: //热门评论
+                adapter = new TabCommentHotNewAdapter(commentBeanHotList, getActivity(), fragementType);
+                break;
+            default:
+                break;
+        }
+
+        adapter.setListener(new TabCommentHotNewAdapter.onThumbClickClistener() {
+            @Override
+            public void onThumbCick(int position, String commentid) {
+                positionChanged = position;
+                helper.doLikeToComment(TAG,commentid);
+            }
+        });
+
+        tabRecyler.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                        && lastVisibleItem + 1 == adapter.getItemCount()) {
+//                    swipeRefreshLayout.setRefreshing(true);
+                    //请求数据
+                    if (!isLastPage) {
+                        presenter.loadAntiqueDeatial(pageIndex,pageSize,antiqueid, PreferencesUtils.getString(getActivity(),Constants.PREFERENCES_USERID));
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
+            }
+        });
+
+        tabRecyler.setAdapter(adapter);
+
+        onRefresh();
+
+        return view;
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    @Override
+    public void showProgress() {
+        if (pageIndex == 1) {
+            tabSwipeRefresh.setRefreshing(false);
+        } else {
+            tabSwipeRefresh.setRefreshing(true);
+        }
+    }
+
+    @Override
+    public void addTresureDetail(AntiqueDetailServerModel antiqueDetailModel) {
+        List<CommentBean> hotCommentList = antiqueDetailModel.getCommentHotBeanList();
+        List<CommentBean> latestCommentList = antiqueDetailModel.getCommentLatestBeanList();
+        switch (fragementType){
+            case Constants.INTENT_FRAGMENT_TYPE_COMMENT_HOT:
+                if(commentBeanHotList != null){
+                    if(!ListUtils.isEmpty(hotCommentList)){
+                        commentBeanHotList.addAll(hotCommentList);
+                    }
+
+                    adapter.notifyDataSetChanged();
+
+                    if(ListUtils.isEmpty(hotCommentList)){
+                        isLastPage = true;
+                    }else if(hotCommentList.size() < pageSize){
+                        isLastPage = true;
+                    }else {
+                        isLastPage = false;
+                        pageIndex ++;
+                    }
+                }
+                break;
+            case Constants.INTENT_FRAGMENT_TYPE_COMMENT_NEW:
+                if(commentBeanNewList != null){
+                    if(!ListUtils.isEmpty(latestCommentList)){
+                        commentBeanNewList.addAll(latestCommentList);
+                    }
+
+                    adapter.notifyDataSetChanged();
+
+                    if(ListUtils.isEmpty(latestCommentList)){
+                        isLastPage = true;
+                    }else if(latestCommentList.size() < pageSize){
+                        isLastPage = true;
+                    }else {
+                        isLastPage = false;
+                        pageIndex ++;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+//    @Override
+//    public void addCommentThumb(List<CommentBean> list) {
+//        if (commentBeanList != null) {
+////            adapter.setShowFooter(true);
+//            if (commentBeanList == null) {
+//                commentBeanList = new ArrayList<>();
+//            }
+//            if (!ListUtils.isEmpty(list)) {
+//                commentBeanList.addAll(list);
+//            }
+//            adapter.notifyDataSetChanged();
+//
+//            if(ListUtils.isEmpty(list)){
+//                isLastPage = true;
+//            }else if(list.size() < pageSize){
+//                isLastPage = true;
+//            }else {
+//                isLastPage = false;
+//                pageIndex ++;
+//            }
+//
+//        }
+//    }
+
+    @Override
+    public void hideProgress() {
+        if(tabSwipeRefresh != null){
+            tabSwipeRefresh.setRefreshing(false);
+        }
+    }
+
+    @Override
+    public void showLoadFailMsg(String msg, Exception e) {
+        if (pageIndex == 1) {
+//            adapter.setShowFooter(false);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        pageIndex = 1;
+        switch (fragementType){
+            case Constants.INTENT_FRAGMENT_TYPE_COMMENT_HOT:
+                if (!ListUtils.isEmpty(commentBeanHotList)) {
+                    commentBeanHotList.clear();
+                }
+                break;
+            case Constants.INTENT_FRAGMENT_TYPE_COMMENT_NEW:
+                if (!ListUtils.isEmpty(commentBeanNewList)) {
+                    commentBeanNewList.clear();
+                }
+                break;
+            default:
+                break;
+        }
+        //请求数据
+        presenter.loadAntiqueDeatial(pageIndex,pageSize,antiqueid, PreferencesUtils.getString(getActivity(),Constants.PREFERENCES_USERID));
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void success(Object object) {
+        if (object instanceof String && object.equals(Constants.INTERFACE_LIKETOCOMMENT_SUCCESS)){
+            //请求所有数据之后更新item
+            adapter.notifyItemChanged(positionChanged);
+            ToastUtils.show(getActivity(),Constants.INTERFACE_LIKE_SUCCESS);
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+
+    }
+}

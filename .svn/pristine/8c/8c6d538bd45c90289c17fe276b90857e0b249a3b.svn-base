@@ -1,0 +1,56 @@
+package com.jhlc.km.sb.tabtresure.presenter;
+
+import android.content.Context;
+
+import com.jhlc.km.sb.model.Beauty;
+import com.jhlc.km.sb.tabtresure.model.TresureMdolImpl;
+import com.jhlc.km.sb.tabtresure.model.TresureModel;
+import com.jhlc.km.sb.tabtresure.view.TresureView;
+import com.jhlc.km.sb.volley.RequestParams;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class TresurePresenterImpl implements TresurePresenter,TresureMdolImpl.onLoadListener{
+
+    private TresureView view;
+    private TresureModel model;
+    private Context mContext;
+
+    public TresurePresenterImpl(TresureView view,Context context) {
+        this.view = view;
+        this.mContext = context;
+        model = new TresureMdolImpl(mContext);
+    }
+
+    @Override
+    public void loadTresure(int pageIndex, int pageSize) {
+        String url = "http://www.diandidaxue.com:8080/apiServer.do";
+        RequestParams params = new RequestParams();
+        params.put("opcode", "getBeauty");
+        params.put("pageNum", String.valueOf(pageIndex));
+        params.put("numPerPage", String.valueOf(pageSize));
+        //只有第一页加载才显示进度条
+        if(pageIndex == 0 || pageIndex == 1){
+            view.showProgress();
+        }
+        model.loadTresure(url,params,this);
+    }
+
+    @Override
+    public void onSuccess(List<Beauty> beautyList) {
+        view.hideProgress();
+        if(beautyList != null){
+            view.addTresure(beautyList);
+        }
+    }
+
+    @Override
+    public void onFailure(String msg, Exception e) {
+        view.hideProgress();
+    }
+}

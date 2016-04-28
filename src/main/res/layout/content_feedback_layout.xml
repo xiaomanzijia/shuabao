@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".activity.OpinionFeedBackActivity"
+    tools:showIn="@layout/activity_opinion_feedback_layout"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="@string/feedback_text_lable"
+        android:id="@+id/testLableFeedback"
+        android:paddingLeft="@dimen/abc_action_bar_content_inset_material"
+        android:paddingTop="@dimen/abc_action_bar_content_inset_material"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/abc_button_padding_horizontal_material" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:hint="@string/feedback_edit_question"
+        android:id="@+id/editFeedbackQuestion"
+        android:layout_below="@+id/testLableFeedback"
+        android:background="@color/white"
+        android:layout_height="100dp"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:inputType="textMultiLine"
+        android:gravity="start"
+        android:textColor="@color/dim_foreground_disabled_material_light"
+        android:textColorHint="@color/dim_foreground_disabled_material_light"
+        android:scrollbars="vertical"
+        android:minLines="3"
+        android:maxLines="8" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:id="@+id/editFeedbackMobile"
+        android:hint="@string/feedback_edit_mobile"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+        android:inputType="number"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:textColor="@color/dim_foreground_disabled_material_light"
+        android:textColorHint="@color/dim_foreground_disabled_material_light"
+        android:layout_below="@+id/editFeedbackQuestion" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="@string/feedback_btn_submint"
+        android:id="@+id/btnFeedbackSubmit"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_search_background"
+        android:layout_below="@+id/editFeedbackMobile"
+        android:layout_margin="@dimen/abc_action_bar_content_inset_material" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/rlCustomerPhone"
+        android:layout_below="@+id/btnFeedbackSubmit"
+        android:layout_centerHorizontal="true">
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:background="@color/transparent"
+            android:id="@+id/imageLablePhone"
+            android:src="@drawable/ibtn_phone_feedback"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/space_20"
+            android:contentDescription="customerphone" />
+
+        <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_phone"
+            android:text="@string/feedback_text_customer_mobile"
+            android:textColor="@color/colorAccent"
+            android:background="@drawable/btn_customer_phone_feedback" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textLableCustomer"
+        android:layout_below="@+id/rlCustomerPhone"
+        android:text="@string/feedback_btn_customer_service"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/abc_action_bar_overflow_padding_end_material" />
+
+
+
+</RelativeLayout>

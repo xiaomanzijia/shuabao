@@ -1,0 +1,967 @@
+package com.jhlc.km.sb.activity;
+
+import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.facebook.binaryresource.BinaryResource;
+import com.facebook.binaryresource.FileBinaryResource;
+import com.facebook.cache.common.CacheKey;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
+import com.facebook.imagepipeline.core.ImagePipelineFactory;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.Postprocessor;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.antiquedetail.presenter.AntiqueDetailPresenter;
+import com.jhlc.km.sb.antiquedetail.presenter.AntiqueDetailPresenterImpl;
+import com.jhlc.km.sb.antiquedetail.view.AntiqueDetailView;
+import com.jhlc.km.sb.common.ImageDownLoader;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.fragment.ShareDialogFragment;
+import com.jhlc.km.sb.model.AntiqueDetailBean;
+import com.jhlc.km.sb.model.AntiqueDetailServerModel;
+import com.jhlc.km.sb.model.CommentBean;
+import com.jhlc.km.sb.model.ImageBean;
+import com.jhlc.km.sb.model.ThumbCountBean;
+import com.jhlc.km.sb.utils.ListUtils;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.SoftInputUtils;
+import com.jhlc.km.sb.utils.StatusBarCompat;
+import com.jhlc.km.sb.utils.StringUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 22/3/16. 此类仅供参考,带定时器,图片自动旋转
+ */
+public class TresureDetailWithTimerActivity extends BaseActivity implements AntiqueDetailView, GestureDetector.OnDoubleTapListener, ServerInterfaceHelper.Listenter, GestureDetector.OnGestureListener, SwipeRefreshLayout.OnRefreshListener {
+
+    @Bind(R.id.imgTresureBig)
+    ImageView imgTresure;
+    @Bind(R.id.textTresureName)
+    TextView textTresureName;
+    @Bind(R.id.textPrice)
+    TextView textPrice;
+    @Bind(R.id.btnShare)
+    Button btnShare;
+    @Bind(R.id.imgCommentUserHead)
+    SimpleDraweeView imgCommentUserHead;
+    @Bind(R.id.textAddressTime)
+    TextView textAddressTime;
+    @Bind(R.id.imgUserHead)
+    SimpleDraweeView imgUserHead;
+    @Bind(R.id.textUserName)
+    TextView textUserName;
+    @Bind(R.id.textDescribe)
+    TextView textDescribe;
+    @Bind(R.id.textTime)
+    TextView textTime;
+    @Bind(R.id.ibtnThumb)
+    ImageButton ibtnThumb;
+    @Bind(R.id.textThumbNums)
+    TextView textThumbNums;
+    @Bind(R.id.editComment)
+    EditText editComment;
+    @Bind(R.id.btnSentComment)
+    Button btnSentComment;
+    @Bind(R.id.btnThumb)
+    Button btnThumb;
+    @Bind(R.id.llUserInfo)
+    RelativeLayout llUserInfo;
+    @Bind(R.id.btnReport)
+    TextView btnReport;
+    @Bind(R.id.btnCollect)
+    ImageButton btnCollect;
+    @Bind(R.id.llCommentHot)
+    LinearLayout llCommentHot;
+    @Bind(R.id.llCommentNews)
+    LinearLayout llCommentNews;
+    @Bind(R.id.imgtest)
+    ImageView imgtest;
+    @Bind(R.id.textBack)
+    TextView textBack;
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.rlTresureInfo)
+    RelativeLayout rlTresureInfo;
+    @Bind(R.id.ibtnGo)
+    ImageView ibtnGo;
+    @Bind(R.id.rlCommentHot)
+    RelativeLayout rlCommentHot;
+    @Bind(R.id.progressBar)
+    ProgressBar progressBar;
+
+    private AntiqueDetailPresenter presenter;
+    private String aniqueId;
+    private String aniqueName;
+    private LinkedList<String> imagesLinkList;
+
+    private ServerInterfaceHelper helper;
+    private static final String TAG = "TresureDetailActivity";
+    //收藏标识 1已收藏 0未收藏
+    private String colflag = "";
+    //页面只刷新评论
+    private boolean loadCommentDataOnly = false;
+
+    private String userid;
+
+    private int likeCount = 0; //宝贝详情点赞数量统计
+
+    private List<CommentBean> commentBeanList;
+    private int pageSize = 8;
+    private int pageIndex = 1;
+
+    private GestureDetector gestureDetector = new GestureDetector(this);
+
+    //图片索引位置
+    private int picindex = 0;
+
+    private int imgLength;
+
+    private float downX;
+
+    //每滑动20像素切换一张图片
+    private float distance = 20;
+
+    private int verticalMinDistance = 20;
+
+    private int minVelocity = 0;
+
+    //设置 onfling 方法中调用的定时器,让图片自动滑动
+    Timer timer = null;
+
+    private int thumbPosition = 0;//记录点赞的item位置
+
+    private int thumbCount = 0; //记录评论初始点赞数量
+
+    private ImageRequest request;
+    private Postprocessor redMeshPostprocessor;
+    private PipelineDraweeController controller;
+
+    private ImageDownLoader mImageDownLoader;
+
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_tresure_detail_layout);
+        ButterKnife.bind(this);
+        StatusBarCompat.compat(this, getResources().getColor(R.color.colorPrimary));
+
+        initView();
+
+        initData();
+
+    }
+
+    private void initData() {
+        aniqueId = getIntent().getStringExtra(Constants.INTENT_ANTIQUE_ID);
+        aniqueName = getIntent().getStringExtra(Constants.INTENT_ANTIQUE_NAME);
+        presenter = new AntiqueDetailPresenterImpl(TresureDetailWithTimerActivity.this, this);
+        if (aniqueName != null && !StringUtils.isBlank(aniqueName)) {
+            textTresureName.setText(aniqueName);
+        }
+        imagesLinkList = new LinkedList<>();
+        helper = new ServerInterfaceHelper(this, TresureDetailWithTimerActivity.this);
+        commentBeanList = new ArrayList<>();
+        mImageDownLoader = new ImageDownLoader(TresureDetailWithTimerActivity.this);
+        onRefresh();
+    }
+
+
+    @Override
+    public void initView() {
+        super.initView();
+        imgTresure.setOnTouchListener(new TouchListener());
+        imgtest.setOnTouchListener(new TouchListenerImage());
+        initDialog();
+    }
+
+
+    @OnClick({R.id.btnReport, R.id.llBack, R.id.btnCollect, R.id.btnShare, R.id.btnSentComment, R.id.btnThumb, R.id.llUserInfo, R.id.rlCommentHot, R.id.rlCommentNew})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                if (imgtest.getVisibility() == View.GONE) {
+                    finish();
+//                    clearMemory();
+                } else {
+                    imgtest.setVisibility(View.GONE);
+                    if (timer != null) {
+                        timer.cancel();
+                    }
+                }
+                break;
+            case R.id.btnReport:
+                Intent report = new Intent(getApplicationContext(), ReportActivity.class);
+                report.putExtra(Constants.INTENT_REPORT_TYPE, aniqueId);
+                startActivity(report);
+                break;
+            case R.id.btnCollect:
+                if (!StringUtils.isBlank(colflag)) {
+                    switch (colflag) {
+                        case Constants.COLFLAG_ALREADY_COLLECTION:
+                            if (PreferencesUtils.getBoolean(TresureDetailWithTimerActivity.this, Constants.PREFERENCES_IS_LOGIN)) {
+                                helper.cancelCollection(TAG, aniqueId);
+                            } else {
+                                toLogin();
+                            }
+                            break;
+                        case Constants.COLFLAG_NOLONGER_COLLECTION:
+                            if (PreferencesUtils.getBoolean(TresureDetailWithTimerActivity.this, Constants.PREFERENCES_IS_LOGIN)) {
+                                helper.doCollection(TAG, aniqueId);
+                            } else {
+                                toLogin();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+            case R.id.btnShare:
+                ShareDialogFragment dialogFragment = new ShareDialogFragment();
+                dialogFragment.show(getFragmentManager(), "sharedialog");
+                break;
+            case R.id.llUserInfo:
+                Intent userinfopage = new Intent(getApplicationContext(), UserInfoPageAcitivity.class);
+                userinfopage.putExtra(Constants.INTENT_USER_ID, userid);
+                startActivity(userinfopage);
+                break;
+            case R.id.btnSentComment: //评论
+                String content = editComment.getText().toString();
+                if (!StringUtils.isBlank(content)) {
+                    helper.comment(TAG, content, aniqueId, "0");
+                } else {
+                    ToastUtils.show(TresureDetailWithTimerActivity.this, "评论内容不能为空");
+                }
+                break;
+            case R.id.btnThumb: //点赞
+                helper.doLike(TAG, aniqueId);
+                break;
+            case R.id.rlCommentHot: //跳转到评论详细
+                toCommentHotNew();
+                break;
+            case R.id.rlCommentNew:
+                toCommentHotNew();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void toCommentHotNew() {
+        Intent commentnew = new Intent(TresureDetailWithTimerActivity.this, CommentHotNewActivity.class);
+        commentnew.putExtra(Constants.INTENT_TRESUREDETAIL_COMMENTHOTNEW_TRESREID, aniqueId);
+        startActivity(commentnew);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+    @Override
+    public void showProgress() {
+
+    }
+
+    //下拉刷新
+    @Override
+    public void onRefresh() {
+        pageIndex = 1;
+        if (!ListUtils.isEmpty(commentBeanList)) {
+            commentBeanList.clear();
+        }
+        if (aniqueId != null && !StringUtils.isBlank(aniqueId)) {
+            if (PreferencesUtils.getBoolean(TresureDetailWithTimerActivity.this, Constants.PREFERENCES_IS_LOGIN)) {
+                presenter.loadAntiqueDeatial(pageIndex, pageSize, Integer.valueOf(aniqueId), PreferencesUtils.getString(
+                        TresureDetailWithTimerActivity.this, Constants.PREFERENCES_USERID));
+                progressDialog.show();
+                loadCommentDataOnly = false;
+            } else {
+                presenter.loadAntiqueDeatial(pageIndex, pageSize, Integer.valueOf(aniqueId), "");
+                loadCommentDataOnly = false;
+            }
+        }
+    }
+
+    @Override
+    public void addTresureDetail(AntiqueDetailServerModel antiqueDetailModel) {
+
+        final AntiqueDetailBean antiqueDetailBean = antiqueDetailModel.getAntiqueDetailBean();
+        List<CommentBean> hotCommentList = antiqueDetailModel.getCommentHotBeanList();
+        List<CommentBean> latestCommentList = antiqueDetailModel.getCommentLatestBeanList();
+        List<ImageBean> imageList = antiqueDetailModel.getAntiqueDetailBean().getImageList();
+
+        userid = antiqueDetailBean.getUuid();
+
+        btnThumb.setText("赞" + antiqueDetailBean.getLikecount());
+
+        likeCount = Integer.valueOf(antiqueDetailBean.getLikecount());
+
+
+        if (loadCommentDataOnly) { //用户评论只刷新评论布局
+            initCommentView(hotCommentList, latestCommentList);
+        } else {
+            colflag = antiqueDetailModel.getColflag();
+
+            //收藏标签判断
+            switch (colflag) {
+                case Constants.COLFLAG_ALREADY_COLLECTION:
+                    btnCollect.setImageDrawable(getResources().getDrawable(R.drawable.ibtn_cancle_collect)); //已收藏
+                    break;
+                case Constants.COLFLAG_NOLONGER_COLLECTION:
+                    btnCollect.setImageDrawable(getResources().getDrawable(R.drawable.ibtn_collection_background)); // 未收藏
+                    break;
+                default:
+                    break;
+            }
+
+            if (imageList != null && imageList.size() != 0) {
+                imgLength = imageList.size();
+                for (int i = 0; i < imageList.size(); i++) {
+                    imagesLinkList.add(imageList.get(i).getImgurl() + Constants.OSS_IMAGE_SIZE500);
+                }
+            }
+
+            if (antiqueDetailBean != null) {
+                textPrice.setText(antiqueDetailBean.getPrice() + "元");
+                textDescribe.setText(antiqueDetailBean.getDescribe());
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String url = Constants.OSS_IMAGE_URL + antiqueDetailBean.getIndeximage() + Constants.OSS_IMAGE_SIZE400;
+                        try {
+                            Bitmap bitmap = mImageDownLoader.getBitmap(url);
+                            Message msg = new Message();
+                            msg.what = 1;
+                            msg.obj = bitmap;
+                            handler.sendMessage(msg);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }).start();
+
+
+                imgCommentUserHead.setImageURI(Uri.parse(antiqueDetailBean.getHeadimgurl() + Constants.OSS_IMAGE_SIZE100));
+                textUserName.setText(antiqueDetailBean.getUsername());
+                textAddressTime.setText(antiqueDetailBean.getAddress() + " " + antiqueDetailBean.getStrdate());
+            }
+
+
+            initCommentView(hotCommentList, latestCommentList);
+
+            progressDialog.dismiss();
+        }
+    }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    Bitmap bitmap = (Bitmap) msg.obj;
+                    imgTresure.setImageBitmap(bitmap);
+                    imgtest.setImageBitmap(bitmap);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    //评论界面刷新
+    private void initCommentView(final List<CommentBean> hotCommentList, final List<CommentBean> latestCommentList) {
+
+        llCommentNews.removeAllViews();
+        llCommentHot.removeAllViews();
+
+        if (hotCommentList != null && hotCommentList.size() != 0) {
+            for (int i = 0; i < hotCommentList.size(); i++) {
+                final int ii = i;
+                final int thumbcount = Integer.valueOf(latestCommentList.get(i).getLikecount());
+                View view = LayoutInflater.from(TresureDetailWithTimerActivity.this).inflate(R.layout.comment_item, null);
+                SimpleDraweeView imgUserHead = (SimpleDraweeView) view.findViewById(R.id.imgUserHead);
+                TextView textUserName = (TextView) view.findViewById(R.id.textUserName);
+                TextView textDescribe = (TextView) view.findViewById(R.id.textDescribe);
+                TextView textTime = (TextView) view.findViewById(R.id.textTime);
+                TextView textThumbNums = (TextView) view.findViewById(R.id.textThumbNums);
+                ImageButton ibtnThumb = (ImageButton) view.findViewById(R.id.ibtnThumb);
+                imgUserHead.setImageURI(Uri.parse(hotCommentList.get(i).getHeadimgurl() + Constants.OSS_IMAGE_SIZE50));
+                textUserName.setText(hotCommentList.get(i).getUsername());
+                textDescribe.setText(hotCommentList.get(i).getContent());
+                textTime.setText(hotCommentList.get(i).getStrdate());
+                textThumbNums.setText(hotCommentList.get(i).getLikecount());
+                ibtnThumb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ThumbCountBean thumbbean = new ThumbCountBean();
+                        thumbbean.setCommenttype(0); // 0 热门 1 最新
+                        thumbbean.setPosition(ii);
+                        thumbbean.setThumbcount(thumbcount);
+                        helper.doLikeToCommentWithThumb(TAG, latestCommentList.get(ii).getId(), thumbbean);
+                    }
+                });
+                llCommentHot.addView(view);
+            }
+        }
+        if (latestCommentList != null && latestCommentList.size() != 0) {
+            for (int i = 0; i < latestCommentList.size(); i++) {
+                final int ii = i;
+                final int thumbcount = Integer.valueOf(latestCommentList.get(i).getLikecount());
+                View view = LayoutInflater.from(TresureDetailWithTimerActivity.this).inflate(R.layout.comment_item, null);
+                SimpleDraweeView imgUserHead = (SimpleDraweeView) view.findViewById(R.id.imgUserHead);
+                TextView textUserName = (TextView) view.findViewById(R.id.textUserName);
+                TextView textDescribe = (TextView) view.findViewById(R.id.textDescribe);
+                TextView textTime = (TextView) view.findViewById(R.id.textTime);
+                TextView textThumbNums = (TextView) view.findViewById(R.id.textThumbNums);
+                ImageButton ibtnThumb = (ImageButton) view.findViewById(R.id.ibtnThumb);
+
+                imgUserHead.setImageURI(Uri.parse(latestCommentList.get(i).getHeadimgurl() + Constants.OSS_IMAGE_SIZE50));
+                textUserName.setText(latestCommentList.get(i).getUsername());
+                textDescribe.setText(latestCommentList.get(i).getContent());
+                textTime.setText(latestCommentList.get(i).getStrdate());
+                textThumbNums.setText(latestCommentList.get(i).getLikecount());
+                ibtnThumb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (PreferencesUtils.getBoolean(TresureDetailWithTimerActivity.this, Constants.PREFERENCES_IS_LOGIN)) {
+                            ThumbCountBean thumbbean = new ThumbCountBean();
+                            thumbbean.setCommenttype(1); // 0 热门 1 最新
+                            thumbbean.setPosition(ii);
+                            thumbbean.setThumbcount(thumbcount);
+                            helper.doLikeToCommentWithThumb(TAG, latestCommentList.get(ii).getId(), thumbbean);
+                        } else {
+                            toLogin();
+                        }
+                    }
+                });
+                llCommentNews.addView(view);
+            }
+        }
+    }
+
+    @Override
+    public void hideProgress() {
+
+    }
+
+    @Override
+    public void showLoadFailMsg(String msg, Exception e) {
+
+    }
+
+    @Override
+    public void success(Object object) {
+        if (object instanceof String && object.equals(Constants.INTERFACE_DO_COLLECTION_SUCCESS)) {  //收藏
+            ToastUtils.show(TresureDetailWithTimerActivity.this, Constants.INTERFACE_DO_COLLECTION_SUCCESS);
+            btnCollect.setImageDrawable(getResources().getDrawable(R.drawable.ibtn_cancle_collect));
+            colflag = Constants.COLFLAG_ALREADY_COLLECTION;
+        } else if (object instanceof String && object.equals(Constants.INTERFACE_CANCEL_COLLECTION_SUCCESS)) { //取消收藏
+            ToastUtils.show(TresureDetailWithTimerActivity.this, Constants.INTERFACE_CANCEL_COLLECTION_SUCCESS);
+            btnCollect.setImageDrawable(getResources().getDrawable(R.drawable.ibtn_collection_background));
+            colflag = Constants.COLFLAG_NOLONGER_COLLECTION;
+        } else if (object instanceof String && object.equals(Constants.INTERFACE_COMMENT_SUCCESS)) { //评论
+            ToastUtils.show(TresureDetailWithTimerActivity.this, Constants.INTERFACE_COMMENT_SUCCESS);
+            pageIndex = 1;
+            if (!ListUtils.isEmpty(commentBeanList)) {
+                commentBeanList.clear();
+            }
+            presenter.loadAntiqueDeatial(pageIndex, pageSize, Integer.valueOf(aniqueId), PreferencesUtils.getString(
+                    TresureDetailWithTimerActivity.this, Constants.PREFERENCES_USERID));
+            loadCommentDataOnly = true;
+            editComment.setText("");
+            SoftInputUtils.hideSoftInput(TresureDetailWithTimerActivity.this, editComment);
+        } else if (object instanceof String && object.equals(Constants.INTERFACE_LIKE_SUCCESS)) { //点赞
+            likeCount += 1;
+            btnThumb.setText("赞" + String.valueOf(likeCount));
+        } else if (object instanceof ThumbCountBean) { //给评论点赞
+            ThumbCountBean bean = (ThumbCountBean) object;
+            switch (bean.getCommenttype()) {
+                case 0: //热门
+                    updateThumbNum(llCommentHot, bean);
+                    break;
+                case 1: //最新
+                    updateThumbNum(llCommentNews, bean);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void updateThumbNum(LinearLayout viegroup, ThumbCountBean bean) {
+        RelativeLayout rlComment = (RelativeLayout) viegroup.getChildAt(bean.getPosition());
+        for (int j = 0; j < rlComment.getChildCount(); j++) {
+            TextView textThumb = (TextView) rlComment.getChildAt(5);
+            textThumb.setText(String.valueOf(bean.getThumbcount() + 1));
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+
+    }
+
+    private void toLogin() {
+        Intent login = new Intent(TresureDetailWithTimerActivity.this, LoginActivity.class);
+        startActivity(login);
+    }
+
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) { //单击
+        storeImageCache();
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        //滑动屏幕的横坐标
+        float xx = e2.getX();
+
+        Log.i("XX", "downX:" + downX + "  xx:" + xx);
+
+        if ((Math.abs(xx - downX)) > distance) {
+
+            //向右滑动
+            if (distanceX < 0) {
+                picindex++;
+            }
+            //向左滑动
+            else {
+                picindex--;
+                if (picindex < 0) {
+                    picindex = imgLength;
+                }
+            }
+
+            Log.i("index", picindex + "");
+
+            showpicByIndex(picindex);
+
+            //把滑动结束后抬手的横坐标赋值给downX
+            downX = xx;
+        }
+
+
+        return true;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        if (e1.getX() - e2.getX() > verticalMinDistance && Math.abs(velocityX) > minVelocity) {
+            if (leftTimerTask != null) {
+                leftTimerTask.cancel();
+            }
+            leftTimerTask = new LeftTimerTask();
+            timer = new Timer();
+            timer.schedule(leftTimerTask, 0, 200);
+
+
+        } else if ((e2.getX() - e1.getX() > verticalMinDistance && Math.abs(velocityX) > minVelocity)) {
+
+            if (rightTimerTask != null) {
+                rightTimerTask.cancel();
+            }
+            rightTimerTask = new RightTimerTask();
+            timer = new Timer();
+            timer.schedule(rightTimerTask, 0, 200);
+
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent e) { //双击
+//        imgtest.setVisibility(View.VISIBLE);
+//        llBack.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                imgtest.setVisibility(View.GONE);
+//            }
+//        });
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e) {
+        return false;
+    }
+
+
+    class LeftTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            Message message = new Message();
+            message.what = 1;
+            autoplayer.sendMessage(message);
+        }
+    }
+
+    class RightTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            Message message = new Message();
+            message.what = 2;
+            autoplayer.sendMessage(message);
+        }
+    }
+
+    TimerTask leftTimerTask = null;
+    TimerTask rightTimerTask = null;
+
+    Handler autoplayer = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1://往左
+                    picindex--;
+                    if (picindex < 0) {
+                        picindex = imgLength;
+                    }
+                    showpicByIndex(picindex);
+                    break;
+                case 2://往右
+                    picindex++;
+                    showpicByIndex(picindex);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    //缓存图片到本地
+    private void storeImageCache() {
+        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setMax(imgLength);
+        Bitmap image = null;
+        final int[] cacheImageCount = {0}; //缓存图片数量统计
+        if (imgLength != 0 && imagesLinkList != null) {
+            for (int i = 0; i < imgLength; i++) {
+                image = mImageDownLoader.downloadImage(imagesLinkList.get(i), new ImageDownLoader.onImageLoaderListener() {
+                    @Override
+                    public void onImageLoader(Bitmap bitmap, String url) { //从网络下载
+                        if (bitmap != null) {
+                            cacheImageCount[0]++;
+                            progressBar.setProgress(cacheImageCount[0]);
+                            if (cacheImageCount[0] == imgLength) {
+                                progressBar.setVisibility(View.GONE);
+                                imgtest.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                });
+                if (image != null) { //加载本地缓存
+                    cacheImageCount[0]++;
+                    progressBar.setProgress(cacheImageCount[0]);
+                    if (cacheImageCount[0] == imgLength) {
+                        progressBar.setVisibility(View.GONE);
+                        imgtest.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+        }
+    }
+
+    private void showpicByIndex(int picindex) {
+        if (imgLength != 0 && imagesLinkList != null) {
+            String mImageUrl = imagesLinkList.get(Math.abs(picindex) % imgLength);
+//            imgTresure.setImageBitmap(mImageDownLoader.showCacheBitmap(mImageUrl.replaceAll("[^\\w]", "")));
+            imgtest.setImageBitmap(mImageDownLoader.showCacheBitmap(mImageUrl.replaceAll("[^\\w]", "")));
+//            Uri uri = Uri.parse(imagesLinkList.get(Math.abs(picindex) % imgLength));
+//            imgTresure.setImageURI(uri);
+//            if (isDownloaded(uri)) {
+//                imgtest.setImageBitmap(getUriFileBitmap(uri));
+//            }
+
+        }
+    }
+
+    //判断uri是否缓存
+    private boolean isDownloaded(Uri loadUri) {
+        if (loadUri == null) {
+            return false;
+        }
+        ImageRequest imageRequest = ImageRequest.fromUri(loadUri);
+        CacheKey cacheKey = DefaultCacheKeyFactory.getInstance()
+                .getEncodedCacheKey(imageRequest);
+        return ImagePipelineFactory.getInstance()
+                .getMainDiskStorageCache().hasKey(cacheKey);
+    }
+
+    //根据url获取缓存文件
+    private Bitmap getUriFileBitmap(Uri uri) {
+        Bitmap bitmap;
+        ImageRequest imageRequest = ImageRequest.fromUri(uri);
+        CacheKey cacheKey = DefaultCacheKeyFactory.getInstance()
+                .getEncodedCacheKey(imageRequest);
+        BinaryResource resource = ImagePipelineFactory.getInstance()
+                .getMainDiskStorageCache().getResource(cacheKey);
+        File file = ((FileBinaryResource) resource).getFile();
+        if (file.exists()) {
+            String filepath = file.getAbsolutePath();
+            Log.i("filepath", filepath);
+            bitmap = BitmapFactory.decodeFile(filepath);
+            return bitmap;
+        } else {
+            return null;
+        }
+    }
+
+    //清除缓存
+//    private void clearMemory() {
+//        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+//        imagePipeline.clearMemoryCaches();
+////        imagePipeline.clearDiskCaches();
+//    }
+
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (imgtest.getVisibility() == View.GONE) {
+                finish();
+//                clearMemory();
+            } else {
+                imgtest.setVisibility(View.GONE);
+                if (timer != null) {
+                    timer.cancel();
+                }
+            }
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
+        return true;
+    }
+
+
+    private final class TouchListener implements View.OnTouchListener { //监听SimpleDrawableView
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            gestureDetector.onTouchEvent(event);
+            /** 通过与运算保留最后八位 MotionEvent.ACTION_MASK = 255 */
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                // 手指压下屏幕
+                case MotionEvent.ACTION_DOWN:
+
+                    if (timer != null) {
+                        timer.cancel();
+                    }
+                    //记录每次手指按下时候的屏幕横坐标
+                    downX = event.getX();
+                    break;
+            }
+            return true;
+        }
+
+    }
+
+    private final class TouchListenerImage implements View.OnTouchListener { //监听ImageView
+
+        /**
+         * 记录是拖拉照片模式还是放大缩小照片模式
+         */
+        private int mode = 0;
+        /**
+         * 拖拉照片模式
+         */
+        private static final int MODE_DRAG = 1;
+        /**
+         * 放大缩小照片模式
+         */
+        private static final int MODE_ZOOM = 2;
+
+        /**
+         * 用于记录开始时候的坐标位置
+         */
+        private PointF startPoint = new PointF();
+        /**
+         * 用于记录拖拉图片移动的坐标位置
+         */
+        private Matrix matrix = new Matrix();
+        /**
+         * 用于记录图片要进行拖拉时候的坐标位置
+         */
+        private Matrix currentMatrix = new Matrix();
+
+        /**
+         * 两个手指的开始距离
+         */
+        private float startDis;
+        /**
+         * 两个手指的中间点
+         */
+        private PointF midPoint;
+
+        private boolean isDrag = false;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            gestureDetector.onTouchEvent(event);
+            /** 通过与运算保留最后八位 MotionEvent.ACTION_MASK = 255 */
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                // 手指压下屏幕
+                case MotionEvent.ACTION_DOWN:
+
+                    if (timer != null) {
+                        timer.cancel();
+                    }
+
+                    //记录每次手指按下时候的屏幕横坐标
+                    downX = event.getX();
+
+                    //如果处于放大模式才允许拖动
+                    if (isDrag) {
+                        mode = MODE_DRAG;
+                    }
+
+                    // 记录ImageView当前的移动位置
+                    currentMatrix.set(imgtest.getImageMatrix());
+                    startPoint.set(event.getX(), event.getY());
+                    break;
+                // 手指在屏幕上移动，改事件会被不断触发
+                case MotionEvent.ACTION_MOVE:
+                    //拖拉图片
+                    if (mode == MODE_DRAG) {
+                        imgtest.setScaleType(ImageView.ScaleType.MATRIX);
+                        float dx = event.getX() - startPoint.x; // 得到x轴的移动距离
+                        float dy = event.getY() - startPoint.y; // 得到y轴的移动距离
+                        // 在没有移动之前的位置上进行移动
+                        matrix.set(currentMatrix);
+                        matrix.postTranslate(dx, dy);
+                    }
+                    //放大缩小图片
+                    else if (mode == MODE_ZOOM) {
+                        imgtest.setScaleType(ImageView.ScaleType.MATRIX);
+                        float endDis = distance(event);// 结束距离
+                        if (endDis > 10f) { // 两个手指并拢在一起的时候像素大于10
+                            float scale = endDis / startDis;// 得到缩放倍数
+                            Log.i("scale", scale + "");
+                            if (scale > 1) {
+                                isDrag = true;
+                            } else {
+                                isDrag = false;
+                            }
+                            matrix.set(currentMatrix);
+                            matrix.postScale(scale, scale, midPoint.x, midPoint.y);
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    // 当触点离开屏幕，但是屏幕上还有触点(手指)
+                case MotionEvent.ACTION_POINTER_UP:
+                    mode = 0;
+                    break;
+                // 当屏幕上已经有触点(手指)，再有一个触点压下屏幕
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    mode = MODE_ZOOM;
+                    /** 计算两个手指间的距离 */
+                    startDis = distance(event);
+                    /** 计算两个手指间的中间点 */
+                    if (startDis > 10f) { // 两个手指并拢在一起的时候像素大于10
+                        midPoint = mid(event);
+                        //记录当前ImageView的缩放倍数
+                        currentMatrix.set(imgtest.getImageMatrix());
+                    }
+                    break;
+            }
+            imgtest.setImageMatrix(matrix);
+            return true;
+        }
+
+        /**
+         * 计算两个手指间的距离
+         */
+        private float distance(MotionEvent event) {
+            float dx = event.getX(1) - event.getX(0);
+            float dy = event.getY(1) - event.getY(0);
+            return (float) Math.sqrt(dx * dx + dy * dy);
+        }
+
+        /**
+         * 计算两个手指间的中间点
+         */
+        private PointF mid(MotionEvent event) {
+            float midX = (event.getX(1) + event.getX(0)) / 2;
+            float midY = (event.getY(1) + event.getY(0)) / 2;
+            return new PointF(midX, midY);
+        }
+
+    }
+}

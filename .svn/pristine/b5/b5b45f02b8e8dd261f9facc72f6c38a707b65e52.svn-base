@@ -1,0 +1,128 @@
+package com.jhlc.km.sb.activity;
+
+import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.adapter.PopWindowApater;
+import com.jhlc.km.sb.model.CategoryBean;
+import com.jhlc.km.sb.utils.ScreenUtils;
+import com.jhlc.km.sb.utils.SqliteUtils;
+import com.jhlc.km.sb.utils.StatusBarCompat;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.jhlc.km.sb.utils.WidgetUtils;
+import com.jhlc.km.sb.view.SearchPopupWindow;
+import com.umeng.analytics.MobclickAgent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 24/3/16.
+ */
+public class UserInfoPageAcitivity extends BaseActivity implements SearchPopupWindow.onClickListener  {
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.sdUserHead)
+    SimpleDraweeView sdUserHead;
+    @Bind(R.id.btnFocus)
+    ImageButton btnFocus;
+    @Bind(R.id.textUserName)
+    TextView textUserName;
+    @Bind(R.id.textAddress)
+    TextView textAddress;
+    @Bind(R.id.textUserWeChatNum)
+    TextView textUserWeChatNum;
+    @Bind(R.id.textUserPhoneNum)
+    TextView textUserPhoneNum;
+    @Bind(R.id.llSearchCondition)
+    LinearLayout llSearchCondition;
+    @Bind(R.id.editSearch)
+    EditText editSearch;
+    @Bind(R.id.ibtnSearch)
+    ImageButton ibtnSearch;
+
+    private SearchPopupWindow popupWindow;
+    private SqliteUtils sqliteUtils;
+    private List<CategoryBean> menuList;
+
+    @Override
+    public void initView() {
+        super.initView();
+        sqliteUtils = new SqliteUtils(UserInfoPageAcitivity.this);
+        menuList = sqliteUtils.getCategoryList();
+//        popupWindow = SearchPopupWindow.getInstance(UserInfoPageAcitivity.this,menuList);
+        popupWindow = new SearchPopupWindow(UserInfoPageAcitivity.this,menuList);
+        popupWindow.setListener(this);
+        sdUserHead.setImageURI(Uri.parse("http://www.diandidaxue.com:8080/images/beauty/20160117105559.jpg"));
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_userinfo_page_layout);
+        ButterKnife.bind(this);
+        StatusBarCompat.compat(this,getResources().getColor(R.color.colorPrimary));
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.btnFocus, R.id.llSearchCondition, R.id.ibtnSearch})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnFocus:
+                ToastUtils.show(getApplicationContext(),"关注");
+                break;
+            case R.id.llSearchCondition:
+                if(popupWindow.isShowing()){
+                    popupWindow.dismiss();
+                }else {
+                    popupWindow.showAsDropDown(view);
+                }
+                break;
+            case R.id.ibtnSearch:
+                ToastUtils.show(getApplicationContext(),"搜索");
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+
+    @Override
+    public void onClick(int position, String menuTitle,String menuId) {
+        ToastUtils.show(UserInfoPageAcitivity.this,menuTitle);
+    }
+}

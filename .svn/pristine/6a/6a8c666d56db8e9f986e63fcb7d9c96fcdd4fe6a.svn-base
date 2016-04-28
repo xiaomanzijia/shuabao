@@ -1,0 +1,43 @@
+package com.jhlc.km.sb.activity;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
+
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.view.PreImageLayout;
+
+import java.io.File;
+
+/**
+ * Created by licheng on 25/4/16.
+ */
+public class ImageTestActivity extends Activity {
+    private PreImageLayout preImageLayout;
+    File[] pics;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_imagetest);
+        preImageLayout = (PreImageLayout) findViewById(R.id.preimagelayout);
+        //从文件夹中读取图片
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){ //判断内存卡是否存在
+            createAndReadFile(Constants.CaptureFilePath + Constants.CaptureFileName);
+        }else {
+            createAndReadFile(getApplicationContext().getPackageResourcePath() + "/" +Constants.CaptureFileName);
+        }
+        preImageLayout.mZoomImageView.initPics(pics);
+    }
+
+    private void createAndReadFile(String path){
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdir();
+        } else {
+            pics = file.listFiles();
+            Log.i("pic",pics.length+"");
+        }
+    }
+}

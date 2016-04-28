@@ -1,0 +1,72 @@
+package com.jhlc.km.sb.activity;
+
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.umeng.analytics.MobclickAgent;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 23/3/16.
+ */
+public class PhotoActivity extends BaseActivity {
+
+    @Bind(R.id.btnTakePhote)
+    Button btnTakePhote;
+    @Bind(R.id.btnChoosePhoto)
+    Button btnChoosePhoto;
+    @Bind(R.id.ibtnClose)
+    ImageButton ibtnClose;
+    @Bind(R.id.imageUserHead)
+    SimpleDraweeView imageUserHead;
+
+    @Override
+    public void initView() {
+        super.initView();
+        imageUserHead.setImageURI(Uri.parse("http://www.diandidaxue.com:8080/images/beauty/20160117105559.jpg"));
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_photo_layout);
+        ButterKnife.bind(this);
+        initView();
+    }
+
+    @OnClick({R.id.btnTakePhote, R.id.btnChoosePhoto, R.id.ibtnClose})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnTakePhote:
+                break;
+            case R.id.btnChoosePhoto:
+                break;
+            case R.id.ibtnClose:
+                finish();
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+}

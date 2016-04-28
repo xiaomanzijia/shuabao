@@ -1,0 +1,402 @@
+package com.jhlc.km.sb.activity;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.antiquedetail.presenter.AntiqueDetailPresenter;
+import com.jhlc.km.sb.antiquedetail.presenter.AntiqueDetailPresenterImpl;
+import com.jhlc.km.sb.antiquedetail.view.AntiqueDetailView;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.fragment.ShareDialogFragment;
+import com.jhlc.km.sb.model.AntiqueDetailBean;
+import com.jhlc.km.sb.model.AntiqueDetailServerModel;
+import com.jhlc.km.sb.model.CommentBean;
+import com.jhlc.km.sb.model.ImageBean;
+import com.jhlc.km.sb.utils.StatusBarCompat;
+import com.jhlc.km.sb.utils.StringUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 22/3/16.
+ */
+public class TresureDetailActivity extends BaseActivity implements AntiqueDetailView {
+
+    @Bind(R.id.imgTresureBig)
+    SimpleDraweeView imgTresure;
+    @Bind(R.id.textTresureName)
+    TextView textTresureName;
+    @Bind(R.id.textPrice)
+    TextView textPrice;
+    @Bind(R.id.btnShare)
+    Button btnShare;
+    @Bind(R.id.imgCommentUserHead)
+    SimpleDraweeView imgCommentUserHead;
+    @Bind(R.id.textAddressTime)
+    TextView textAddressTime;
+    @Bind(R.id.textCommentNews)
+    TextView textCommentNews;
+    @Bind(R.id.imgUserHead)
+    SimpleDraweeView imgUserHead;
+    @Bind(R.id.textUserName)
+    TextView textUserName;
+    @Bind(R.id.textDescribe)
+    TextView textDescribe;
+    @Bind(R.id.textTime)
+    TextView textTime;
+    @Bind(R.id.ibtnThumb)
+    ImageButton ibtnThumb;
+    @Bind(R.id.textThumbNums)
+    TextView textThumbNums;
+    @Bind(R.id.editComment)
+    EditText editComment;
+    @Bind(R.id.btnSentComment)
+    Button btnSentComment;
+    @Bind(R.id.btnThumb)
+    Button btnThumb;
+    @Bind(R.id.llUserInfo)
+    RelativeLayout llUserInfo;
+    @Bind(R.id.btnReport)
+    TextView btnReport;
+    @Bind(R.id.btnCollect)
+    ImageButton btnCollect;
+    @Bind(R.id.llCommentHot)
+    LinearLayout llCommentHot;
+    @Bind(R.id.llCommentNews)
+    LinearLayout llCommentNews;
+
+    private AntiqueDetailPresenter presenter;
+    private String aniqueId;
+    private String aniqueName;
+    private LinkedList<String> imagesLinkList;
+
+//    private GestureDetector gestureDetector = new GestureDetector(this);
+//
+//    //图片索引位置
+//    private int picindex = 0;
+//
+//    private float downX;
+//
+//    //每滑动20像素切换一张图片
+//    private float distance = 20;
+//
+//    private int verticalMinDistance = 20;
+//
+//    private int minVelocity = 0;
+
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_tresure_detail_layout);
+        ButterKnife.bind(this);
+        StatusBarCompat.compat(this, getResources().getColor(R.color.colorPrimary));
+
+        initView();
+
+        initData();
+
+    }
+
+    private void initData() {
+        aniqueId = getIntent().getStringExtra(Constants.INTENT_ANTIQUE_ID);
+        aniqueName = getIntent().getStringExtra(Constants.INTENT_ANTIQUE_NAME);
+        presenter = new AntiqueDetailPresenterImpl(TresureDetailActivity.this,this);
+        if(aniqueId != null && !StringUtils.isBlank(aniqueId)){
+            presenter.loadAntiqueDeatial(1,8,Integer.valueOf(aniqueId));
+        }
+        if(aniqueName != null && !StringUtils.isBlank(aniqueName)){
+            textTresureName.setText(aniqueName);
+        }
+        imagesLinkList = new LinkedList<>();
+    }
+
+    @Override
+    public void initView() {
+        super.initView();
+    }
+
+
+    @OnClick({R.id.btnReport, R.id.llBack, R.id.btnCollect, R.id.btnShare, R.id.editComment, R.id.btnSentComment, R.id.btnThumb, R.id.llUserInfo})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnReport:
+                Intent report = new Intent(getApplicationContext(), ReportActivity.class);
+                startActivity(report);
+                break;
+            case R.id.btnCollect:
+                ToastUtils.show(getApplicationContext(), "收藏");
+                break;
+            case R.id.btnShare:
+                ShareDialogFragment dialogFragment = new ShareDialogFragment();
+                dialogFragment.show(getFragmentManager(), "sharedialog");
+                break;
+            case R.id.llUserInfo:
+                Intent userinfopage = new Intent(getApplicationContext(), UserInfoPageAcitivity.class);
+                startActivity(userinfopage);
+                break;
+            case R.id.editComment:
+                break;
+            case R.id.btnSentComment:
+                ToastUtils.show(getApplicationContext(), "发送评论");
+                break;
+            case R.id.btnThumb:
+                ToastUtils.show(getApplicationContext(), "点赞");
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+    @Override
+    public void showProgress() {
+
+    }
+
+    @Override
+    public void addTresureDetail(AntiqueDetailServerModel antiqueDetailModel) {
+        AntiqueDetailBean antiqueDetailBean = antiqueDetailModel.getAntiqueDetailBean();
+        List<CommentBean> hotCommentList = antiqueDetailModel.getCommentHotBeanList();
+        List<CommentBean> latestCommentList = antiqueDetailModel.getCommentLatestBeanList();
+        List<ImageBean> imageList = antiqueDetailModel.getAntiqueDetailBean().getImageList();
+
+        llCommentNews.removeAllViews();
+        llCommentHot.removeAllViews();
+
+        if (antiqueDetailBean != null) {
+            textPrice.setText(antiqueDetailBean.getPrice());
+            textDescribe.setText(antiqueDetailBean.getDescribe());
+            imgTresure.setImageURI(Uri.parse(Constants.OSS_IMAGE_URL+antiqueDetailBean.getIndeximage()));
+            imgCommentUserHead.setImageURI(Uri.parse(antiqueDetailBean.getHeadimgurl()));
+            textUserName.setText(antiqueDetailBean.getUsername());
+            textAddressTime.setText(antiqueDetailBean.getAddress() + " " + antiqueDetailBean.getStrdate());
+        }
+
+        if(imageList != null && imageList.size() != 0){
+            Log.i("TresureDetailActivity","宝贝图片大小:"+imageList.size());
+            for (int i = 0; i < imageList.size(); i++) {
+                imagesLinkList.add(imageList.get(i).getImgurl());
+            }
+        }
+
+        if (hotCommentList != null && hotCommentList.size() != 0) {
+            for (int i = 0; i < hotCommentList.size(); i++) {
+                final int ii = i;
+                View view = LayoutInflater.from(TresureDetailActivity.this).inflate(R.layout.comment_item, null);
+                SimpleDraweeView imgUserHead = (SimpleDraweeView) view.findViewById(R.id.imgUserHead);
+                TextView textUserName = (TextView) view.findViewById(R.id.textUserName);
+                TextView textDescribe = (TextView) view.findViewById(R.id.textDescribe);
+                TextView textTime = (TextView) view.findViewById(R.id.textTime);
+                TextView textThumbNums = (TextView) view.findViewById(R.id.textThumbNums);
+                ImageButton ibtnThumb = (ImageButton) view.findViewById(R.id.ibtnThumb);
+                imgUserHead.setImageURI(Uri.parse(hotCommentList.get(i).getHeadimgurl()));
+                textUserName.setText(hotCommentList.get(i).getUsername());
+                textDescribe.setText(hotCommentList.get(i).getContent());
+                textTime.setText(hotCommentList.get(i).getStrdate());
+                textThumbNums.setText(hotCommentList.get(i).getLikecount());
+                ibtnThumb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ToastUtils.show(TresureDetailActivity.this, "赞" + ii);
+                    }
+                });
+                llCommentHot.addView(view);
+            }
+        }
+        if (latestCommentList != null && latestCommentList.size() != 0) {
+            for (int i = 0; i < latestCommentList.size(); i++) {
+                final int ii = i;
+                View view = LayoutInflater.from(TresureDetailActivity.this).inflate(R.layout.comment_item, null);
+                SimpleDraweeView imgUserHead = (SimpleDraweeView) view.findViewById(R.id.imgUserHead);
+                TextView textUserName = (TextView) view.findViewById(R.id.textUserName);
+                TextView textDescribe = (TextView) view.findViewById(R.id.textDescribe);
+                TextView textTime = (TextView) view.findViewById(R.id.textTime);
+                TextView textThumbNums = (TextView) view.findViewById(R.id.textThumbNums);
+                ImageButton ibtnThumb = (ImageButton) view.findViewById(R.id.ibtnThumb);
+                imgUserHead.setImageURI(Uri.parse(latestCommentList.get(i).getHeadimgurl()));
+                textUserName.setText(latestCommentList.get(i).getUsername());
+                textDescribe.setText(latestCommentList.get(i).getContent());
+                textTime.setText(latestCommentList.get(i).getStrdate());
+                textThumbNums.setText(latestCommentList.get(i).getLikecount());
+                ibtnThumb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ToastUtils.show(TresureDetailActivity.this, "赞" + ii);
+                    }
+                });
+                llCommentNews.addView(view);
+            }
+        }
+    }
+
+    @Override
+    public void hideProgress() {
+
+    }
+
+    @Override
+    public void showLoadFailMsg(String msg, Exception e) {
+
+    }
+
+
+//    @Override
+//    public boolean onDown(MotionEvent e) {
+//        return false;
+//    }
+//
+//    @Override
+//    public void onShowPress(MotionEvent e) {
+//
+//    }
+//
+//    @Override
+//    public boolean onSingleTapUp(MotionEvent e) {
+//        return false;
+//    }
+//
+//    @Override
+//    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+//        //滑动屏幕的横坐标
+//        float xx = e2.getX();
+//
+//        Log.i("XX", "downX:" + downX + "  xx:" + xx);
+//
+//        if ((Math.abs(xx - downX)) > distance) {
+//
+//            //向右滑动
+//            if (distanceX < 0) {
+//                picindex++;
+//            }
+//            //向左滑动
+//            else {
+//                picindex--;
+//                if (picindex < 0) {
+//                    picindex = imgLength;
+//                }
+//            }
+//
+//            Log.i("index", picindex + "");
+//
+//            showpicByIndex(picindex);
+//
+//            //把滑动结束后抬手的横坐标赋值给downX
+//            downX = xx;
+//        }
+//
+//
+//        return true;
+//    }
+//
+//    @Override
+//    public void onLongPress(MotionEvent e) {
+//
+//    }
+//
+//    @Override
+//    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+//        if (e1.getX() - e2.getX() > verticalMinDistance && Math.abs(velocityX) > minVelocity) {
+//            if (leftTimerTask != null) {
+//                leftTimerTask.cancel();
+//            }
+//            leftTimerTask = new LeftTimerTask();
+//            timer = new Timer();
+//            timer.schedule(leftTimerTask, 0, 200);
+//
+//
+//        } else if ((e2.getX() - e1.getX() > verticalMinDistance && Math.abs(velocityX) > minVelocity)) {
+//
+//            if (rightTimerTask != null) {
+//                rightTimerTask.cancel();
+//            }
+//            rightTimerTask = new RightTimerTask();
+//            timer = new Timer();
+//            timer.schedule(rightTimerTask, 0, 200);
+//
+//        }
+//        return false;
+//    }
+
+//    class LeftTimerTask extends TimerTask {
+//        @Override
+//        public void run() {
+//            Message message = new Message();
+//            message.what = 1;
+//            autoplayer.sendMessage(message);
+//        }
+//    }
+//
+//    class RightTimerTask extends TimerTask {
+//        @Override
+//        public void run() {
+//            Message message = new Message();
+//            message.what = 2;
+//            autoplayer.sendMessage(message);
+//        }
+//    }
+//
+//    TimerTask leftTimerTask = null;
+//    TimerTask rightTimerTask = null;
+//
+//    Handler autoplayer = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            switch (msg.what) {
+//                case 1://往左
+//                    picindex--;
+//                    if (picindex < 0) {
+//                        picindex = imgLength;
+//                    }
+//                    showpicByIndex(picindex);
+//                    break;
+//                case 2://往右
+//                    picindex++;
+//                    showpicByIndex(picindex);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//    };
+}

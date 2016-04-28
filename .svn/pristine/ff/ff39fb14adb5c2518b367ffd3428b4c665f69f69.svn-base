@@ -1,0 +1,374 @@
+package com.jhlc.km.sb.activity;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.alibaba.sdk.android.oss.ClientConfiguration;
+import com.alibaba.sdk.android.oss.ClientException;
+import com.alibaba.sdk.android.oss.OSS;
+import com.alibaba.sdk.android.oss.OSSClient;
+import com.alibaba.sdk.android.oss.ServiceException;
+import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
+import com.alibaba.sdk.android.oss.model.PutObjectRequest;
+import com.alibaba.sdk.android.oss.model.PutObjectResult;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.common.ServerInterfaceHelper;
+import com.jhlc.km.sb.common.UUIDGenerator;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.oss.ImageDisplayer;
+import com.jhlc.km.sb.oss.OssService;
+import com.jhlc.km.sb.oss.STSGetter;
+import com.jhlc.km.sb.oss.UICallback;
+import com.jhlc.km.sb.oss.UIDispatcher;
+import com.jhlc.km.sb.oss.UIProgressCallback;
+import com.jhlc.km.sb.receiver.DataRefreshReceiver;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.StringUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 28/3/16.
+ */
+public class PublishTresureActivity extends BaseActivity implements ServerInterfaceHelper.Listenter {
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.textTresureName)
+    TextView textTresureName;
+    @Bind(R.id.btnReport)
+    TextView btnReport;
+    @Bind(R.id.imgPublishTresure)
+    ImageView imgPublishTresure;
+    @Bind(R.id.editTresureDes)
+    EditText editTresureDes;
+    @Bind(R.id.textPublishPrice)
+    TextView textPublishPrice;
+    @Bind(R.id.textWeChatNum)
+    TextView textWeChatNum;
+    @Bind(R.id.rlWeChatNum)
+    RelativeLayout rlWeChatNum;
+    @Bind(R.id.textMobile)
+    TextView textMobile;
+    @Bind(R.id.rlMobile)
+    RelativeLayout rlMobile;
+    @Bind(R.id.ibtnWeChatForward)
+    ImageButton ibtnWeChatForward;
+
+
+    File pics[];
+    private int imgLength;
+    private final static String TAG = "PublishTresureActivity";
+    File file;
+
+    //宝贝名称
+    private String tresurename;
+    //首页宝贝图
+    private String indexImg;
+    //宝贝描述
+    private String des;
+
+
+
+    //上传成功的图片
+    private List<String> picUploadSuccess;
+    //上传失败的图片
+    private List<String> picUploadFailure;
+    private Handler handler = new Handler();
+    //OSS回调成功图片数量
+    private int ii;
+    //OSS回调失败图片数量
+    private int jj;
+    //OSS的上传下载
+    private OssService ossService;
+    //负责所有的界面更新
+    private ImageDisplayer ImageDisplayer;
+    private UIDispatcher UIDispatcher;
+
+    private StringBuilder imgselected;
+
+    private ServerInterfaceHelper helper;
+
+
+    @Override
+    public void initView() {
+        super.initView();
+        textTresureName.setText("发布宝贝");
+        btnReport.setText("发布");
+        ibtnWeChatForward.setVisibility(View.INVISIBLE);
+        //从文件夹中读取图片
+        createAndReadFile();
+        if(imgLength != 0){
+            showFistPicture();
+        }
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_publish_tresure_layout);
+        ButterKnife.bind(this);
+        initView();
+        initData();
+    }
+
+    private void createAndReadFile(){
+        file = new File(Constants.CaptureFilePath + "pictest/");
+        if (!file.exists()) {
+            file.mkdir();
+            Log.i("MainActivity", "no file");
+        } else {
+            pics = file.listFiles();
+            imgLength = pics.length;
+            Log.i(TAG, imgLength + "");
+        }
+    }
+
+    private void initData() {
+
+        picUploadSuccess = new ArrayList<>();
+        picUploadFailure = new ArrayList<>();
+
+        UIDispatcher = new UIDispatcher(Looper.getMainLooper());
+        /**
+         * 获取OSS服务
+         */
+        ossService = initOSS(Constants.endpoint, Constants.bucket,ImageDisplayer);
+
+        helper = new ServerInterfaceHelper(this,PublishTresureActivity.this);
+    }
+
+    //初始化一个OssService用来上传下载
+    public OssService initOSS(String endpoint, String bucket, ImageDisplayer displayer) {
+        //如果希望直接使用accessKey来访问的时候，可以直接使用OSSPlainTextAKSKCredentialProvider来鉴权。
+        //OSSCredentialProvider credentialProvider = new OSSPlainTextAKSKCredentialProvider(accessKeyId, accessKeySecret);
+
+        //使用自己的获取STSToken的类
+        OSSCredentialProvider credentialProvider = new STSGetter(Constants.stsServer);
+
+        ClientConfiguration conf = new ClientConfiguration();
+        conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
+        conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
+        conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
+        conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
+
+        OSS oss = new OSSClient(getApplicationContext(), endpoint, credentialProvider, conf);
+
+        return new OssService(oss, bucket, displayer);
+
+    }
+
+
+    public UICallback<PutObjectRequest, PutObjectResult> getPutCallback() {
+        return new UICallback<PutObjectRequest, PutObjectResult>(UIDispatcher) {
+            @Override
+            public void onSuccess(PutObjectRequest request, PutObjectResult result) {
+                Log.d("PutObject", "UploadSuccess");
+
+                Log.d("ETag", result.getETag());
+                Log.d("RequestId", result.getRequestId());
+                final String object = request.getObjectKey();
+                final String ETag = result.getETag();
+                final String requestid = result.getRequestId();
+                final String callback = result.getServerCallbackReturnBody();
+
+                addCallback(new Runnable() {
+                    @Override
+                    public void run() {
+                        ii ++;
+                        Log.i(TAG,"上传成功"+object+" "+ETag+" "+requestid+" "+callback);
+                        picUploadSuccess.add(object);
+                        if(ii == (imgLength - jj)){
+                            //调用发布投诉接口
+                            handler.post(runnable);
+                        }else{
+
+                        }
+                    }
+                }, null);
+                super.onSuccess(request, result);
+            }
+
+            @Override
+            public void onFailure(PutObjectRequest request, ClientException clientExcepion, ServiceException serviceException) {
+                String info = "";
+                final String object = request.getObjectKey();
+                // 请求异常
+                if (clientExcepion != null) {
+                    // 本地异常如网络异常等
+                    clientExcepion.printStackTrace();
+                    info = clientExcepion.toString();
+                }
+                if (serviceException != null) {
+                    // 服务异常
+                    Log.e("ErrorCode", serviceException.getErrorCode());
+                    Log.e("RequestId", serviceException.getRequestId());
+                    Log.e("HostId", serviceException.getHostId());
+                    Log.e("RawMessage", serviceException.getRawMessage());
+                    info = serviceException.toString();
+                }
+                final String outputinfo = new String(info);
+                addCallback(null, new Runnable() {
+                    @Override
+                    public void run() {
+                        jj ++;
+                        Log.i(TAG,"上传失败"+outputinfo);
+                        picUploadFailure.add(object);
+//                        displayInfo(outputinfo);
+                    }
+                });
+                onFailure(request, clientExcepion, serviceException);
+            }
+        };
+    }
+
+    @Override
+    public void success(Object object) {
+        if(object instanceof String && object.equals(Constants.INTERFACE_CREATE_ANTIQUES_SUCCESS)){
+            ToastUtils.show(PublishTresureActivity.this,"发布成功");
+            btnReport.setEnabled(true);
+            //发送首页数据更新广播
+            Intent refreshrecevier = new Intent(Constants.BROADCASTRECEIVER_DATA_REFRESH);
+            refreshrecevier.putExtra(Constants.BROADCASTRECEIVER_DATA_REFRESH_TRUE,true);
+            sendBroadcast(refreshrecevier);
+            Intent intent = new Intent(PublishTresureActivity.this,MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    @Override
+    public void failure(String status) {
+
+    }
+
+    private class ProgressCallbackFactory<T> {
+        public UIProgressCallback<T> get() {
+            return new UIProgressCallback<T>(UIDispatcher) {
+                @Override
+                public void onProgress(T request, long currentSize, long totalSize) {
+                    final int progress = (int) (100 * currentSize / totalSize);
+                    addCallback(new Runnable() {
+                        @Override
+                        public void run() {
+//                            displayInfo("进度"+String.valueOf(progress)+"%");
+                            displayProgressBar(progress);
+//                            updateProgress(progress);
+//                            displayInfo("进度: " + String.valueOf(progress) + "%");
+                        }
+                    });
+                    super.onProgress(request, currentSize, totalSize);
+                }
+            };
+        }
+    }
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+                if(picUploadSuccess.size() != 0){
+                    //获取上传成功的照片
+                    for (int i = 0; i < picUploadSuccess.size(); i++) {
+                        if(i == 0){
+                            indexImg = picUploadSuccess.get(i);
+                            imgselected.append(picUploadSuccess.get(i));
+                        }else {
+                            imgselected.append(","+picUploadSuccess.get(i));
+                        }
+                    }
+                    String imgs = imgselected.toString();
+                    Log.i(TAG,imgs);
+                    //发布投诉
+                    helper.createAntique(TAG,tresurename,indexImg,"1010","1",des,imgs);
+                }
+
+                if(picUploadFailure.size() != 0){
+                    for (int i = 0; i < picUploadFailure.size(); i++) {
+                        Log.i(TAG,picUploadFailure.get(i));
+                    }
+                }
+        }
+    };
+
+//    private void displayInfo(String info){
+//        ((TextView)findViewById(R.id.progress)).setText(info);
+//    }
+
+    private void displayProgressBar(int progress){
+        ((ProgressBar)findViewById(R.id.progressImgUpload)).setProgress(progress);
+    }
+
+    @OnClick({R.id.llBack, R.id.btnReport, R.id.rlMobile})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnReport:
+                imgselected = new StringBuilder();
+                des = editTresureDes.getText().toString();
+                if(PreferencesUtils.getBoolean(PublishTresureActivity.this,Constants.PREFERENCES_IS_LOGIN)){
+                    if(!StringUtils.isBlank(des) && des.length() > 6){
+                        tresurename = des.substring(0,5);
+                        btnReport.setEnabled(false);
+                        //上传到OSS
+                        for (int i = 0; i < imgLength; i++) {
+                            String name = UUIDGenerator.getUUID();
+                            String picPath = pics[i].getAbsolutePath();
+
+                            if(picPath.endsWith(".jpg")){
+                                name = name + ".jpg";
+//                            imgselected.append(","+name+".jpg");
+                            }else if(picPath.endsWith(".png")){
+                                name = name + ".png";
+//                            imgselected.append(","+name+".png");
+                            }else if(picPath.endsWith(".gif")){
+                                name = name + ".gif";
+//                            imgselected.append(","+name+".gif");
+                            }else if(picPath.endsWith(".icon")){
+                                name = name + ".icon";
+//                            imgselected.append(","+name+".icon");
+                            }
+                            ossService.asyncPutImage(name, picPath, getPutCallback(), new ProgressCallbackFactory<PutObjectRequest>().get());
+                        }
+                    }else {
+                        ToastUtils.show(PublishTresureActivity.this,"宝贝描述不少于10字");
+                    }
+
+                }else {
+                    Intent login = new Intent(PublishTresureActivity.this,LoginActivity.class);
+                    startActivity(login);
+                }
+                break;
+            case R.id.rlMobile:
+                ToastUtils.show(getApplicationContext(), "手机号");
+                break;
+        }
+    }
+
+    private void showFistPicture() {
+        File file = pics[0];
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+        imgPublishTresure.setImageBitmap(bitmap);
+    }
+}

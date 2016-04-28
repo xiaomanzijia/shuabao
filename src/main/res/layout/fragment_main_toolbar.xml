@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorPrimary"
+    android:layout_height="?attr/actionBarSize">
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:src="@drawable/btn_menu_firstpage"
+        android:background="@android:color/transparent"
+        android:id="@+id/ibtnMenu"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true" />
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginRight="@dimen/abc_action_bar_content_inset_material"
+        android:layout_height="?attr/actionBarSize"
+        app:tabIndicatorColor="@color/colorMainRed"
+        app:tabIndicatorHeight="@dimen/tabIndicatorHeight"
+        app:tabTextColor="@color/white"
+        app:tabSelectedTextColor="@color/white"
+        android:layout_toLeftOf="@+id/ibtnSearch"
+        android:layout_toRightOf="@+id/ibtnMenu" />
+
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:src="@drawable/btn_search_firstpage"
+        android:id="@+id/ibtnSearch"
+        android:background="@android:color/transparent"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" />
+
+</RelativeLayout>

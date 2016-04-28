@@ -1,0 +1,149 @@
+package com.jhlc.km.sb.activity;
+
+import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.adapter.PopWindowApater;
+import com.jhlc.km.sb.utils.ScreenUtils;
+import com.jhlc.km.sb.utils.StatusBarCompat;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.jhlc.km.sb.utils.WidgetUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import java.util.ArrayList;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+/**
+ * Created by licheng on 24/3/16.
+ */
+public class UserInfoPageAcitivity extends BaseActivity implements AdapterView.OnItemClickListener  {
+    @Bind(R.id.llBack)
+    LinearLayout llBack;
+    @Bind(R.id.sdUserHead)
+    SimpleDraweeView sdUserHead;
+    @Bind(R.id.btnFocus)
+    ImageButton btnFocus;
+    @Bind(R.id.textUserName)
+    TextView textUserName;
+    @Bind(R.id.textAddress)
+    TextView textAddress;
+    @Bind(R.id.textUserWeChatNum)
+    TextView textUserWeChatNum;
+    @Bind(R.id.textUserPhoneNum)
+    TextView textUserPhoneNum;
+    @Bind(R.id.llSearchCondition)
+    LinearLayout llSearchCondition;
+    @Bind(R.id.editSearch)
+    EditText editSearch;
+    @Bind(R.id.ibtnSearch)
+    ImageButton ibtnSearch;
+
+    private View popview;
+    private ListView lvPopMenu;
+    private PopupWindow popupWindow;
+    private PopWindowApater adapter;
+    private ArrayList<String> menuList;
+
+    @Override
+    public void initView() {
+        super.initView();
+        initPopWindow();
+        sdUserHead.setImageURI(Uri.parse("http://www.diandidaxue.com:8080/images/beauty/20160117105559.jpg"));
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_userinfo_page_layout);
+        ButterKnife.bind(this);
+        StatusBarCompat.compat(this,getResources().getColor(R.color.colorPrimary));
+        initView();
+    }
+
+    @OnClick({R.id.llBack, R.id.btnFocus, R.id.llSearchCondition, R.id.ibtnSearch})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.llBack:
+                finish();
+                break;
+            case R.id.btnFocus:
+                ToastUtils.show(getApplicationContext(),"关注");
+                break;
+            case R.id.llSearchCondition:
+                if(popupWindow.isShowing()){
+                    popupWindow.dismiss();
+                }else {
+                    popupWindow.showAsDropDown(view);
+                }
+                break;
+            case R.id.ibtnSearch:
+                ToastUtils.show(getApplicationContext(),"搜索");
+                break;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+    private void initPopWindow(){
+        if(popupWindow == null){
+            popview = LayoutInflater.from(UserInfoPageAcitivity.this).inflate(R.layout.popwindow_layout,null);
+            lvPopMenu = (ListView) popview.findViewById(R.id.lvMenus);
+            lvPopMenu.getBackground().setAlpha(240);
+            menuList = new ArrayList<>();
+            menuList.add("瓷器");
+            menuList.add("铜器");
+            menuList.add("玉器");
+            menuList.add("木器");
+            menuList.add("钱币");
+            menuList.add("书画");
+            menuList.add("其他");
+            adapter = new PopWindowApater(menuList,UserInfoPageAcitivity.this);
+            lvPopMenu.setAdapter(adapter);
+            int lvPopMenuHeight = WidgetUtils.getTotalHeightofListView(lvPopMenu);
+            popupWindow = new PopupWindow(popview, ScreenUtils.getDeviceWidth(UserInfoPageAcitivity.this),lvPopMenuHeight);
+        }
+
+        popupWindow.setBackgroundDrawable(new BitmapDrawable());
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setFocusable(true);
+        lvPopMenu.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ToastUtils.show(UserInfoPageAcitivity.this,menuList.get(position));
+        if(popupWindow != null){
+            popupWindow.dismiss();
+        }
+    }
+}

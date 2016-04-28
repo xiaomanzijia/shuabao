@@ -1,0 +1,95 @@
+<resources>
+    <string name="app_name">耍宝</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="edit_search_hint">请输入关键字</string>
+    <string name="edit_search_tresure_hint">查找宝贝</string>
+    <string name="btn_back">返回</string>
+    <string name="btn_search">搜索</string>
+    <string name="btn_report">举报</string>
+    <string name="reportdetail_comment">评论</string>
+
+    <string name="personalprofile_userhead">头像</string>
+    <string name="personalprofile_username">姓名</string>
+    <string name="personalprofile_wecharnum">微信号</string>
+    <string name="personalprofile_mobile">手机号</string>
+    <string name="personalprofile_address">所在地</string>
+
+    <string name="photo_takepic">拍照</string>
+    <string name="photo_choosephote">从手机相册选择</string>
+    
+    <string name="login_edit_mobile">手机号</string>
+    <string name="login_edit_yzm">验证码</string>
+    <string name="login_edit_password">密码</string>
+    <string name="login_btn_getyzm">获取验证码</string>
+    <string name="login_btn_loging">马上登陆</string>
+    <string name="login_text_forgetpassword">忘记密码?</string>
+    <string name="login_text_regist">10秒免费注册</string>
+    <string name="login_text_compaire_site">合作网站账号登陆</string>
+
+    <string name="feedback_text_lable">在线反馈</string>
+    <string name="feedback_edit_question">您的问题或建议</string>
+    <string name="feedback_edit_mobile">填写您的手机号,方便我们及时联系您</string>
+    <string name="feedback_btn_submint">提交</string>
+    <string name="feedback_text_customer_mobile">400-7111-658</string>
+    <string name="feedback_btn_customer_service">7×24客服热线</string>
+
+    <string name="dialog_share_friend_cirlce">朋友圈</string>
+    <string name="dialog_share_sina">新浪</string>
+    <string name="dialog_share_wechat">微信</string>
+    <string name="dialog_share_qq">QQ</string>
+    <string name="dialog_share_message">短信</string>
+    <string name="dialog_text_cancle">取消</string>
+    
+    <string name="report_edit_content">举报内容</string>
+    <string name="report_btn_submit">提交</string>
+
+    <string name="carview_fragment_me_btn_edit">编辑</string>
+    <string name="carview_fragment_me_btn_share">分享</string>
+    <string name="carview_fragment_me_btn_delete">删除</string>
+
+    <string name="takepic_btn_longpress">开始拍摄</string>
+    <string name="takepic_btn_stop">停止拍摄</string>
+    <string name="photopreview_text_title">预览</string>
+    <string name="photopreview_text_delete">删除</string>
+    <string name="photopreview_text_save">保存</string>
+
+    <string name="publish_tresure_price">自估价</string>
+    <string name="publish_tresure_hint_introduce">请介绍一下您的宝贝</string>
+
+    <string name="personal_profile_btn_quit">退出账号</string>
+
+    <string name="edilt_userinfo_edit_mobile_hint">手机号</string>
+    <string name="edilt_userinfo_edit_yzm_hint">验证码</string>
+
+    <string name="publish_tresure_edit_price_hint">自估价</string>
+    <string name="publish_tresure_text_type">类别</string>
+
+
+    <string name="search_condition_text_type">玉器</string>
+    <string name="search_condition_text_price">价格</string>
+    <string name="search_condition_text_hot">人气</string>
+
+    <string name="tabfragment_no_tresure_focused">您还没有关注过玩友</string>
+    <string name="tabfragment_no_tresure_collect">您还没有收藏过宝贝</string>
+    <string name="btn_antiquedetail_share">分享</string>
+    <string name="btn_comment_send">发送</string>
+    <string name="btn_comment_thumb">赞</string>
+    <string name="text_personal_profile_address">获取当前位置</string>
+
+    <string-array name="tab_item_name">
+        <item>最新</item>
+        <item>关注</item>
+        <item>收藏</item>
+    </string-array>
+
+    <string-array name="tab_item_name_comment_thumb">
+        <item>评论</item>
+        <item>赞</item>
+    </string-array>
+
+    <string-array name="tab_item_name_comment_hot_new">
+        <item>最新评论</item>
+        <item>热门评论</item>
+    </string-array>
+</resources>

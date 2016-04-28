@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:baselineAligned="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:id="@+id/llShareContainer">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/llShareSina"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:id="@+id/ibtnSina"
+                android:src="@drawable/ibtn_share_sina"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/abc_action_bar_overflow_padding_start_material" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/dialog_share_sina"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/llShareWeChat"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:id="@+id/ibtnWeChat"
+                android:src="@drawable/ibtn_share_wechat"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/abc_action_bar_overflow_padding_start_material" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/dialog_share_wechat"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/llShareFriendCicle"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:id="@+id/ibtnFriendCicle"
+                android:src="@drawable/ibtn_share_friend_circle"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/abc_action_bar_overflow_padding_start_material" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_below="@+id/ibtnFriendCicle"
+                android:text="@string/dialog_share_friend_cirlce"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/llShareQQ"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:id="@+id/ibtnQQ"
+                android:src="@drawable/itbn_share_qq"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/abc_action_bar_overflow_padding_start_material" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/dialog_share_qq"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/llShareMessage"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:background="@color/transparent"
+                android:id="@+id/ibtnMessage"
+                android:src="@drawable/ibtn_share_message"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/abc_action_bar_overflow_padding_start_material" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/dialog_share_message"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/linegray"
+        android:layout_height="@dimen/line_height"
+        android:layout_marginTop="@dimen/abc_action_bar_overflow_padding_end_material"
+        android:id="@+id/lableLine"></View>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:text="@string/dialog_text_cancle"
+        android:id="@+id/btnCancle"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/abc_action_bar_overflow_padding_end_material"
+        android:layout_alignParentBottom="false" />
+
+
+</LinearLayout>

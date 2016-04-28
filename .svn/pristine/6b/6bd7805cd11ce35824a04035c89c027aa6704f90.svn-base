@@ -1,0 +1,33 @@
+package com.jhlc.km.sb;
+
+import android.app.Application;
+import android.content.Context;
+
+import com.facebook.drawee.backends.pipeline.Fresco;
+
+import java.util.concurrent.TimeUnit;
+
+import butterknife.ButterKnife;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class SbApplication extends Application {
+
+    private static Context mContext;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        //Fresco
+        Fresco.initialize(this);
+
+        mContext = getApplicationContext();
+    }
+
+
+    public static Context getContext() {
+        return mContext;
+    }
+
+}

@@ -1,0 +1,210 @@
+package com.jhlc.km.sb.constants;
+
+import android.os.Environment;
+
+/**
+ * Created by licheng on 28/3/16.
+ */
+public class Constants {
+
+    //OSS图片上传
+    public final static String endpoint = "http://oss-cn-hangzhou.aliyuncs.com";
+//    public static final String callbackAddress = "http://www.201494.com:8080";
+    public static final String bucket = "shuabao";
+    public static final String stsServer = "http://120.26.95.62:9494/shuabao/ossServer";
+
+    //服务器接口地址
+    public final static String SERVER_URL = "http://120.26.95.62:9494/shuabao/ShuaBaoapi.do";
+
+    //阿里OSS服务器地址
+    public final static String OSS_URL = "http://120.26.95.62:9494/shuabao/ossServer";
+
+    //阿里OSS图片服务器地址
+    public final static String OSS_IMAGE_URL = "http://shuabao.img-cn-hangzhou.aliyuncs.com/";
+    public final static String OSS_DEFAULT_IMG_USERHEAD = "defaulheadimg.jpg@100h";
+    public final static String OSS_IMAGE_SIZE50 = "@50h";
+    public final static String OSS_IMAGE_SIZE100 = "@100h";
+    public final static String OSS_IMAGE_SIZE200 = "@200h";
+    public final static String OSS_IMAGE_SIZE300 = "@300h";
+    public final static String OSS_IMAGE_SIZE400 = "@400h";
+    public final static String OSS_IMAGE_SIZE500 = "@500h";
+
+    public final static String WECHAT_IMAGE_SIZE0 = "/0"; //代表640*640正方形头像
+    public final static String WECHAT_IMAGE_SIZE46 = "/46";
+    public final static String WECHAT_IMAGE_SIZE64 = "/64";
+    public final static String WECHAT_IMAGE_SIZE96 = "/96";
+    public final static String WECHAT_IMAGE_SIZE132 = "/132";
+
+    //耍宝拍照帮助网页
+    public final static String WEB_HELP = "http://120.26.95.62:9494/shuabao/help.do";
+
+    //QQ三方
+    public final static String QQ_APP_ID = "1105323062";
+    //微信三方
+    public final static String WeChat_APP_ID = "wxd386253b3cd82ece";
+    public final static String WeChat_APP_SECRET = "6058451007868dfad91c0991035eb3aa";
+
+
+    //服务器成功返回status
+    public final static String STATUS_SUCCESS = "success";
+    public final static String STATUS_FAILURE = "error";
+
+    //服务器请求接口名称
+    public final static String INTERFACE_MSG_CODE = "sendMsgCode";//发送验证码
+    public final static String INTERFACE_REGIST = "regist";//用户注册
+    public final static String INTERFACE_INITREGIST = "initregist";//初始化用户
+    public final static String INTERFACE_LOGIN = "login";//用户登陆
+    public final static String INTERFACE_UPDATE_UERINFO = "updateUserInfo";//用户信息修改
+    public final static String INTERFACE_UPDATE_MOBILE = "updateMobile";//用户手机号修改
+    public final static String INTERFACE_MOBILE_CODECHECK = "mobileCodeCheck";//用户手机号验证
+    public final static String INTERFACE_UPDATE_PWD = "updatePwd";//用户密码修改
+    public final static String INTERFACE_GET_ANTIQUES = "getAntiques";//获取古玩最新列表
+    public final static String INTERFACE_GET_ANTIQUES_COLLECTOIN = "getCollections";//获取古玩收藏列表
+    public final static String INTERFACE_GET_ANTIQUES_FOCUSED = "getFollows";//获取古玩关注列表
+    public final static String INTERFACE_CREATE_ANTIQUE = "createAntique";//发布古玩
+    public final static String INTERFACE_DELETE_ANTIQUE = "deleteAntique";//删除古玩
+    public final static String INTERFACE_UPDATE_ANTIQUE = "updateAntique";//删除古玩
+    public final static String INTERFACE_GET_ANTIQUEDETAIL = "getAntiqueDetail";//获取古玩详情
+    public final static String INTERFACE_GET_CATEGORYS = "getCatagorys";//获取古玩类别
+    public final static String INTERFACE_DO_COLLECTION = "doCollection";//收藏古玩
+    public final static String INTERFACE_CANCEL_COLLECTION = "cancelCollection";//收藏古玩
+    public final static String INTERFACE_REPORT = "doReport";//收藏古玩
+    public final static String INTERFACE_FEEDBACK = "doFeedback";//收藏古玩
+    public final static String INTERFACE_COMMENT = "comment";//评论古玩
+    public final static String INTERFACE_FOLLOW = "doFollow";//关注
+    public final static String INTERFACE_GETUSRINFOBYID = "GetUserInfoByID";//获取用户信息
+    public final static String INTERFACE_COMPUTEBYUSERID = "computeByUserID";//用户中心点赞宝贝数量统计
+    public final static String INTERFACE_SELECTLIKEDETAIL = "selectLikeDetail";//点赞明细
+    public final static String INTERFACE_SELECTCOMMENTDETAIL = "selectCommentDetail";//评论明细
+    public final static String INTERFACE_CANCLEFOLLOW = "cancelFollow";//取消关注
+    public final static String INTERFACE_DOLIKE = "doLike";//取消关注
+    public final static String INTERFACE_DOLIKETOCOMMENT = "doLikeToComment";//古玩详情评论点赞
+
+
+
+    //服务器接口返回状态
+    public final static String INTERFACE_QUEST_FAILER = "请求失败";
+    public final static String INTERFACE_REGIST_SUCCESS = "注册成功";
+    public final static String INTERFACE_REGIST_FAILURE = "注册失败";
+    public final static String INTERFACE_MSG_CODE_SUCCESS = "验证码发送成功";
+    public final static String INTERFACE_MSG_CODE_FAILURE = "验证码发送失败";
+    public final static String INTERFACE_EDITUSERINFO_SUCCESS = "修改成功";
+    public final static String INTERFACE_INITREGIST_SUCCESS = "用户初始化成功";
+    public final static String INTERFACE_EDITUSERINFO_FAILURE = "修改失败";
+    public final static String INTERFACE_EDIT_MOBILE_SUCCESS = "手机号修改成功";
+    public final static String INTERFACE_EDIT_MOBILE_FAILURE = "手机号修改失败";
+    public final static String INTERFACE_EDIT_PWD_SUCCESS = "密码修改成功";
+    public final static String INTERFACE_EDIT_PWD_FAILURE = "密码修改失败";
+    public final static String INTERFACE_CREATE_ANTIQUES_SUCCESS = "发布古玩成功";
+    public final static String INTERFACE_CREATE_ANTIQUES_FAILURE = "发布古玩失败";
+    public final static String INTERFACE_DO_COLLECTION_SUCCESS = "收藏成功";
+    public final static String INTERFACE_CANCEL_COLLECTION_SUCCESS = "取消收藏成功";
+    public final static String INTERFACE_COMMENT_SUCCESS = "评论成功";
+    public final static String INTERFACE_THUMB_SUCCESS = "评论成功";
+    public final static String INTERFACE_REPORT_SUCCESS = "举报成功";
+    public final static String INTERFACE_FEEDBACK_SUCCESS = "反馈成功";
+    public final static String INTERFACE_FOLLOW_SUCCESS = "关注成功";
+    public final static String INTERFACE_LIKE_SUCCESS = "点赞成功";
+    public final static String INTERFACE_LIKETOCOMMENT_SUCCESS = "评论点赞成功";
+    public final static String INTERFACE_CACLEFOLLOW_SUCCESS = "取消关注成功";
+
+
+    //收藏标识
+    public final static String COLFLAG_ALREADY_COLLECTION = "1";
+    public final static String COLFLAG_NOLONGER_COLLECTION = "0";
+
+    //本地连续拍照图片预览文件夹地址
+    public final static String CaptureFilePath = Environment
+            .getExternalStorageDirectory() + "/DCIM/Camera/";
+
+    //图片存储文件夹名
+    public final static String CaptureFileName = "shuabao/";
+
+    //判断用户是否登陆
+    public final static String PREFERENCES_IS_LOGIN = "PREFERENCES_IS_LOGIN";
+
+    //用户信息存储
+    public final static String PREFERENCES_USERID = "PREFERENCES_USERID";//用户ID
+    public final static String PREFERENCES_USER_HEADIMG = "PREFERENCES_USER_HEADIMG";//用户头像
+    public final static String PREFERENCES_USER_CITY = "PREFERENCES_USER_CITY";//城市
+    public final static String PREFERENCES_USER_ADDRESS = "PREFERENCES_USER_ADDRESS";//地址
+    public final static String PREFERENCES_USER_CCREATE_DATE = "PREFERENCES_USER_CCREATE_DATE";//创建时间
+    public final static String PREFERENCES_USER_MOBILE = "PREFERENCES_USER_MOBILE";//手机号码
+    public final static String PREFERENCES_USER_PROVINCE = "PREFERENCES_USER_PROVINCE";//所在省份
+    public final static String PREFERENCES_USER_PWD = "PREFERENCES_USER_PWD";//密码
+    public final static String PREFERENCES_USER_STATUS = "PREFERENCES_USER_STATUS";//登陆状态
+    public final static String PREFERENCES_USERNAME = "PREFERENCES_USERNAME";//用户名
+    public final static String PREFERENCES_USER_UUID = "PREFERENCES_USER_UUID";//用户唯一号码
+    public final static String PREFERENCES_USER_WECHAT_NUM = "PREFERENCES_USER_WECHAT_NUM";//用户微信号
+    public final static String PREFERENCES_USER_LOGINID = "PREFERENCES_USER_LOGINID";//用户微信号
+
+    //用户信息编辑事件跳转判断
+    public final static String INTENT_TYPE = "INTENT_TYPE";
+    public final static String INTENT_TYPE_FORGET_PASSWORD = "FORGET_PASSWOED";
+    public final static String INTENT_TYPE_EDIT_USERINFO = "INTENT_TYPE_EDIT_USERINFO";
+    public final static String INTENT_TYPE_EDIT = "INTENT_TYPE_EDIT";
+    public final static String INTENT_TYPE_EDIT_USERINFO_USERNAME = "username";
+    public final static String INTENT_TYPE_EDIT_USERINFO_WECHATNO = "wechatno";
+    public final static String INTENT_TYPE_EDIT_USERINFO_MOBILE = "mobile";
+    public final static String INTENT_TYPE_EDIT_HEADIMGURL = "headimgurl";
+    public final static String INTENT_TYPE_EDIT_ADDRESS = "headimgurl";
+
+    //搜索界面事件跳转判断
+    public final static String INTENT_SEARCH_CONDITION_TYPE = "INTENT_SEARCH_CONDITION_TYPE";
+    public final static String INTENT_TYPE_SEARCH = "INTENT_TYPE_SEARCH";
+    public final static String INTENT_TYPE_MENU_CONDITION = "INTENT_TYPE_MENU_CONDITION";
+    public final static String INTENT_TYPE_SEARCH_BTN = "INTENT_TYPE_SEARCH_BTN";
+
+    //发布宝贝界面事件跳转判断
+    public final static String INTENT_TYPE_PUBLISH_TRESURE = "INTENT_TYPE_PUBLISH_TRESURE";
+    public final static String INTENT_TYPE_PUBLISH_TRESURE_PREVIEW = "INTENT_TYPE_PUBLISH_TRESURE_PREVIEW";
+    public final static String INTENT_TYPE_PUBLISH_TRESURE_EDIT = "INTENT_TYPE_PUBLISH_TRESURE_EDIT";
+    public final static String INTENT_MEFRAGMENT_PUBLISH_TRESURE_ID = "INTENT_MEFRAGMENT_PUBLISH_TRESURE_ID";
+    public final static String INTENT_MEFRAGMENT_PUBLISH_TRESURE_CONTENT = "INTENT_MEFRAGMENT_PUBLISH_TRESURE_CONTENT";
+    public final static String INTENT_MEFRAGMENT_PUBLISH_TRESURE_PRICE = "INTENT_MEFRAGMENT_PUBLISH_TRESURE_PRICE";
+    public final static String INTENT_MEFRAGMENT_PUBLISH_TRESURE_IMGURL = "INTENT_MEFRAGMENT_PUBLISH_TRESURE_IMGURL";
+
+    //popwindow跳转判断
+    public final static String INTENT_ANTIQUE_ID = "INTENT_ANTIQUE_ID";
+    public final static String INTENT_ANTIQUE_NAME = "INTENT_ANTIQUE_NAME";
+
+    //主页fragment跳转传值
+    public final static String INTENT_FRAGMENT_TYPE = "INTENT_FRAGMENT_TYPE";
+    public final static String INTENT_FRAGMENT_TYPE_NEWS = "最新";
+    public final static String INTENT_FRAGMENT_TYPE_FOCUSED = "关注";
+    public final static String INTENT_FRAGMENT_TYPE_COLLECT = "收藏";
+
+    //评论赞fragment跳转传值
+    public final static String INTENT_FRAGMENT_COMMENTTHUMB_TYPE = "INTENT_FRAGMENT_COMMENTTHUMB_TYPE";
+    public final static String INTENT_FRAGMENT_TYPE_COMMENT = "评论";
+    public final static String INTENT_FRAGMENT_TYPE_THUMB = "赞";
+    public final static String INTENT_FRAGMENT_TYPE_COMMENT_NEW = "最新评论";
+    public final static String INTENT_FRAGMENT_TYPE_COMMENT_HOT = "热门评论";
+
+    //热门最新评论跳转
+    public final static String INTENT_TRESUREDETAIL_COMMENTHOTNEW_TRESREID = "INTENT_TRESUREDETAIL_COMMENTHOTNEW_TRESREID";
+
+    //举报反馈事件跳转判断
+    public final static String INTENT_REPORT_TYPE = "INTENT_REPORT_TYPE";
+    public final static String INTENT_FEEDBACK_TYPE = "INTENT_FEEDBACK_TYPE";
+
+    //宝贝详情界面跳转用户中心
+    public final static String INTENT_USER_ID = "INTENT_USER_ID";
+
+    public final static String TAG_FRAGMENT_FOCUSED = "您还没有关注过玩友";
+    public final static String TAG_FRAGMENT_NEWS = "没有数据";
+    public final static String TAG_FRAGMENT_COLLECT = "您还没有收藏过宝贝";
+    public final static String TAG_FRAGMENT_REPROT = "您还没有发布过宝贝";
+    public final static String TAG_FRAGMENT_LOGIN_NOTICE = "您还没有登录哦";
+    public final static String TAG_NO_SEARCH_KEYWORD = "请输入关键字";
+    public final static String TAG_NO_SEARCH_RESUTL = "没有相关结果";
+
+
+    //广播
+    public final static String BROADCASTRECEIVER_DATA_REFRESH = "BROADCASTRECEIVER_DATA_REFRESH";
+    public final static String BROADCASTRECEIVER_DATA_REFRESH_TRUE = "BROADCASTRECEIVER_DATA_REFRESH_TRUE";
+
+    public static String ChangeHeadImage = "ChangeHeadImage";
+    public static int ResultCode  = 100;
+
+}

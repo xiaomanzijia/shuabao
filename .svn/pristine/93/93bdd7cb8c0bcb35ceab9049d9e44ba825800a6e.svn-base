@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    tools:showIn="@layout/activity_personal_profile_layout"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/personal_userhead_item"></include>
+    <include layout="@layout/personal_username_item"></include>
+    <include layout="@layout/personal_wechat_item"></include>
+    <include layout="@layout/personal_mobile_item"></include>
+    <include layout="@layout/personal_address_item"></include>
+
+</LinearLayout>

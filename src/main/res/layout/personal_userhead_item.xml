@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:background="@color/white"
+    android:layout_height="wrap_content"
+    android:id="@+id/rlUserHead">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:id="@+id/textLeft"
+        android:text="@string/personalprofile_userhead"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_margin="@dimen/abc_action_bar_content_inset_material"
+        android:textColor="@color/abc_primary_text_material_light" />
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:layout_width="80dp"
+        android:id="@+id/imgUserHead"
+        fresco:roundAsCircle="true"
+        android:layout_height="80dp"
+        android:layout_toLeftOf="@+id/ibtnWeChatForward"
+        android:layout_centerVertical="true"
+        android:paddingTop="@dimen/abc_action_bar_content_inset_material"
+        android:paddingBottom="@dimen/abc_action_bar_content_inset_material" />
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:src="@drawable/me_forward"
+        android:id="@+id/ibtnWeChatForward"
+        android:background="@android:color/transparent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:layout_centerVertical="true" />
+
+</RelativeLayout>

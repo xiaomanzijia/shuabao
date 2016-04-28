@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    tools:showIn="@layout/activity_photo_layout"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:background="@color/colorPrimary"
+
+    android:layout_height="match_parent">
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:layout_width="match_parent"
+        android:id="@+id/imageUserHead"
+        fresco:actualImageScaleType="focusCrop"
+        android:src="@drawable/input_seach"
+        android:layout_height="300dp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="@string/photo_takepic"
+        android:background="@drawable/btn_photo_background"
+        android:id="@+id/btnTakePhote"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginRight="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginTop="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginBottom="@dimen/abc_action_bar_content_inset_material" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:text="@string/photo_choosephote"
+        android:id="@+id/btnChoosePhoto"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:background="@drawable/btn_photo_background"
+        android:layout_marginLeft="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginRight="@dimen/abc_action_bar_content_inset_material" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:src="@drawable/btn_photo_closer"
+        android:id="@+id/ibtnClose"
+        android:background="@android:color/transparent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="@dimen/abc_action_bar_content_inset_material"
+        android:layout_marginTop="@dimen/abc_action_bar_content_inset_material" />
+
+
+
+</LinearLayout>

@@ -1,0 +1,412 @@
+package com.jhlc.km.sb.activity;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.jhlc.km.sb.R;
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.utils.FileUtils;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.ToastUtils;
+import com.umeng.analytics.MobclickAgent;
+
+import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public class PhotoPreviewActivity extends BaseActivity implements GestureDetector.OnGestureListener {
+
+    @Bind(R.id.ibtnClose)
+    ImageButton ibtnClose;
+    @Bind(R.id.imageView)
+    ImageView imageView;
+    @Bind(R.id.btnDelete)
+    TextView btnDelete;
+    @Bind(R.id.btnSave)
+    TextView btnSave;
+
+    private GestureDetector gestureDetector = new GestureDetector(this);
+    private int imgLength;
+
+    File file;
+
+    File[] pics;
+    //图片索引位置
+    private int picindex = 0;
+
+    private float downX;
+
+    //每滑动20像素切换一张图片
+    private float distance = 20;
+
+    private int verticalMinDistance = 20;
+
+    private int minVelocity = 0;
+
+    @Override
+    public void initView() {
+        super.initView();
+        imageView.setOnTouchListener(new TouchListener());
+        //从文件夹中读取图片
+        if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)){ //判断内存卡是否存在
+            createAndReadFile(Constants.CaptureFilePath + Constants.CaptureFileName);
+        }else {
+            createAndReadFile(getApplicationContext().getPackageResourcePath() + "/" +Constants.CaptureFileName);
+        }
+        //显示文件夹第一张图片
+        if(imgLength != 0){
+            showFistPicture();
+        }
+        imageView.setLongClickable(true);
+        gestureDetector.setIsLongpressEnabled(true);
+    }
+
+    private void createAndReadFile(String path){
+        file = new File(path);
+        if (!file.exists()) {
+            file.mkdir();
+            Log.i("MainActivity", "no file");
+        } else {
+            pics = file.listFiles();
+            imgLength = pics.length;
+            Log.i("MainActivity", imgLength + "");
+        }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_photopreview_layout);
+        ButterKnife.bind(this);
+        initView();
+    }
+
+    //设置 onfling 方法中调用的定时器,让图片自动滑动
+    Timer timer = null;
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        //滑动屏幕的横坐标
+        float xx = e2.getX();
+
+        Log.i("XX", "downX:" + downX + "  xx:" + xx);
+
+        if ((Math.abs(xx - downX)) > distance) {
+
+            //向右滑动
+            if (distanceX < 0) {
+                picindex++;
+            }
+            //向左滑动
+            else {
+                picindex--;
+                if (picindex < 0) {
+                    picindex = imgLength;
+                }
+            }
+
+            Log.i("index", picindex + "");
+
+            showpicByIndex(picindex);
+
+            //把滑动结束后抬手的横坐标赋值给downX
+            downX = xx;
+        }
+
+
+        return true;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        if (e1.getX() - e2.getX() > verticalMinDistance && Math.abs(velocityX) > minVelocity) {
+            if (leftTimerTask != null) {
+                leftTimerTask.cancel();
+            }
+            leftTimerTask = new LeftTimerTask();
+            timer = new Timer();
+            timer.schedule(leftTimerTask, 0, 200);
+
+
+        } else if ((e2.getX() - e1.getX() > verticalMinDistance && Math.abs(velocityX) > minVelocity)) {
+
+            if (rightTimerTask != null) {
+                rightTimerTask.cancel();
+            }
+            rightTimerTask = new RightTimerTask();
+            timer = new Timer();
+            timer.schedule(rightTimerTask, 0, 200);
+
+        }
+        return false;
+    }
+
+    @OnClick({R.id.ibtnClose, R.id.btnDelete, R.id.btnSave})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.ibtnClose:
+                finish();
+                break;
+            case R.id.btnDelete:
+                deleteFileAndFinish();
+                break;
+            case R.id.btnSave:
+                if(PreferencesUtils.getBoolean(PhotoPreviewActivity.this,Constants.PREFERENCES_IS_LOGIN)){
+                    if(imgLength > 0){
+                        Intent publishTresure = new Intent(PhotoPreviewActivity.this,PublishTresureActivity.class);
+                        publishTresure.putExtra(Constants.INTENT_TYPE_PUBLISH_TRESURE,Constants.INTENT_TYPE_PUBLISH_TRESURE_PREVIEW);
+                        startActivity(publishTresure);
+                    }else {
+                        ToastUtils.show(PhotoPreviewActivity.this,"您还没给宝贝拍照片");
+                    }
+
+                }else {
+                    Intent login = new Intent(PhotoPreviewActivity.this,LoginActivity.class);
+                    startActivity(login);
+                }
+                break;
+        }
+    }
+
+    private void deleteFileAndFinish(){
+        if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)){ //判断内存卡是否存在
+            if(FileUtils.deleteFile(Constants.CaptureFilePath + Constants.CaptureFileName)){
+                finish();
+            }
+        }else {
+            if(FileUtils.deleteFile(getApplicationContext().getPackageResourcePath() + "/" +Constants.CaptureFileName)){
+                finish();
+            }
+        }
+    }
+
+    class LeftTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            Message message = new Message();
+            message.what = 1;
+            autoplayer.sendMessage(message);
+        }
+    }
+
+    class RightTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            Message message = new Message();
+            message.what = 2;
+            autoplayer.sendMessage(message);
+        }
+    }
+
+    TimerTask leftTimerTask = null;
+    TimerTask rightTimerTask = null;
+
+    Handler autoplayer = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1://往左
+                    picindex--;
+                    if (picindex < 0) {
+                        picindex = imgLength;
+                    }
+                    showpicByIndex(picindex);
+                    break;
+                case 2://往右
+                    picindex++;
+                    showpicByIndex(picindex);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    private void showpicByIndex(int picindex) {
+        if(imgLength != 0){
+            File file = pics[Math.abs(picindex) % imgLength];
+            //图片转换为bitmap
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            imageView.setImageBitmap(bitmap);
+        }
+    }
+
+
+    private void showFistPicture() {
+        File file = pics[0];
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+        imageView.setImageBitmap(bitmap);
+    }
+
+    private final class TouchListener implements OnTouchListener {
+
+        /** 记录是拖拉照片模式还是放大缩小照片模式 */
+        private int mode = 0;
+        /** 拖拉照片模式 */
+        private static final int MODE_DRAG = 1;
+        /** 放大缩小照片模式 */
+        private static final int MODE_ZOOM = 2;
+
+        /** 用于记录开始时候的坐标位置 */
+        private PointF startPoint = new PointF();
+        /** 用于记录拖拉图片移动的坐标位置 */
+        private Matrix matrix = new Matrix();
+        /** 用于记录图片要进行拖拉时候的坐标位置 */
+        private Matrix currentMatrix = new Matrix();
+
+        /** 两个手指的开始距离 */
+        private float startDis;
+        /** 两个手指的中间点 */
+        private PointF midPoint;
+
+        private boolean isDrag = false;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            gestureDetector.onTouchEvent(event);
+            /** 通过与运算保留最后八位 MotionEvent.ACTION_MASK = 255 */
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                // 手指压下屏幕
+                case MotionEvent.ACTION_DOWN:
+
+                    if (timer != null) {
+                        timer.cancel();
+                    }
+                    //记录每次手指按下时候的屏幕横坐标
+                    downX = event.getX();
+
+                    //如果处于放大模式才允许拖动
+                    if (isDrag) {
+                        mode = MODE_DRAG;
+                    }
+
+                    // 记录ImageView当前的移动位置
+                    currentMatrix.set(imageView.getImageMatrix());
+                    startPoint.set(event.getX(), event.getY());
+                    break;
+                // 手指在屏幕上移动，改事件会被不断触发
+                case MotionEvent.ACTION_MOVE:
+                    //拖拉图片
+                    if (mode == MODE_DRAG) {
+                        imageView.setScaleType(ImageView.ScaleType.MATRIX);
+                        float dx = event.getX() - startPoint.x; // 得到x轴的移动距离
+                        float dy = event.getY() - startPoint.y; // 得到y轴的移动距离
+                        // 在没有移动之前的位置上进行移动
+                        matrix.set(currentMatrix);
+                        matrix.postTranslate(dx, dy);
+                    }
+                    //放大缩小图片
+                    else if (mode == MODE_ZOOM) {
+                        imageView.setScaleType(ImageView.ScaleType.MATRIX);
+                        float endDis = distance(event);// 结束距离
+                        if (endDis > 10f) { // 两个手指并拢在一起的时候像素大于10
+                            float scale = endDis / startDis;// 得到缩放倍数
+                            Log.i("scale", scale + "");
+                            if (scale > 1) {
+                                isDrag = true;
+                            } else {
+                                isDrag = false;
+                            }
+                            matrix.set(currentMatrix);
+                            matrix.postScale(scale, scale, midPoint.x, midPoint.y);
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    // 当触点离开屏幕，但是屏幕上还有触点(手指)
+                case MotionEvent.ACTION_POINTER_UP:
+                    mode = 0;
+                    break;
+                // 当屏幕上已经有触点(手指)，再有一个触点压下屏幕
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    mode = MODE_ZOOM;
+                    /** 计算两个手指间的距离 */
+                    startDis = distance(event);
+                    /** 计算两个手指间的中间点 */
+                    if (startDis > 10f) { // 两个手指并拢在一起的时候像素大于10
+                        midPoint = mid(event);
+                        //记录当前ImageView的缩放倍数
+                        currentMatrix.set(imageView.getImageMatrix());
+                    }
+                    break;
+            }
+            imageView.setImageMatrix(matrix);
+            return true;
+        }
+
+        /** 计算两个手指间的距离 */
+        private float distance(MotionEvent event) {
+            float dx = event.getX(1) - event.getX(0);
+            float dy = event.getY(1) - event.getY(0);
+            return (float) Math.sqrt(dx * dx + dy * dy);
+        }
+
+        /** 计算两个手指间的中间点 */
+        private PointF mid(MotionEvent event) {
+            float midX = (event.getX(1) + event.getX(0)) / 2;
+            float midY = (event.getY(1) + event.getY(0)) / 2;
+            return new PointF(midX, midY);
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+}

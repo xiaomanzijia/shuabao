@@ -1,0 +1,91 @@
+package com.jhlc.km.sb.tabtresure.presenter;
+
+import android.content.Context;
+
+import com.jhlc.km.sb.constants.Constants;
+import com.jhlc.km.sb.model.AntiqueBean;
+import com.jhlc.km.sb.model.Beauty;
+import com.jhlc.km.sb.tabtresure.model.TresureMdolImpl;
+import com.jhlc.km.sb.tabtresure.model.TresureModel;
+import com.jhlc.km.sb.tabtresure.view.TresureView;
+import com.jhlc.km.sb.utils.PreferencesUtils;
+import com.jhlc.km.sb.utils.ServerUtils;
+import com.jhlc.km.sb.volley.RequestParams;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by licheng on 21/3/16.
+ */
+public class TresurePresenterImpl implements TresurePresenter,TresureMdolImpl.onLoadListener{
+
+    private TresureView view;
+    private TresureModel model;
+    private Context mContext;
+    private final static String TAG = "TresurePresenterImpl";
+
+    public TresurePresenterImpl(TresureView view,Context context) {
+        this.view = view;
+        this.mContext = context;
+        model = new TresureMdolImpl(mContext);
+    }
+
+    @Override
+    public void loadTresure(int pageIndex, int pageSize,String catagoryid,String name,String userid,String pricesort,String popularsort) {
+        Map<String,String> params = new HashMap<>();
+        params.put("op", Constants.INTERFACE_GET_ANTIQUES);
+        params.put("pageNum", String.valueOf(pageIndex));
+        params.put("numPerPage", String.valueOf(pageSize));
+        params.put("catagoryid", catagoryid);
+        params.put("name", name);
+        params.put("userid", userid);
+        params.put("pricesort", pricesort);
+        params.put("popularsort", popularsort);
+        //只有第一页加载才显示进度条
+        if(pageIndex == 0 || pageIndex == 1){
+            view.showProgress();
+        }
+        model.loadTresure(Constants.SERVER_URL, ServerUtils.getRequestParams(params,TAG),this);
+    }
+
+    @Override
+    public void loadTresureFocused(int pageIndex, int pageSize) {
+        Map<String,String> params = new HashMap<>();
+        params.put("op", Constants.INTERFACE_GET_ANTIQUES_FOCUSED);
+        params.put("pageNum", String.valueOf(pageIndex));
+        params.put("numPerPage", String.valueOf(pageSize));
+        params.put("userid", PreferencesUtils.getString(mContext,Constants.PREFERENCES_USERID));
+        //只有第一页加载才显示进度条
+        if(pageIndex == 0 || pageIndex == 1){
+            view.showProgress();
+        }
+        model.loadTresure(Constants.SERVER_URL, ServerUtils.getRequestParams(params,TAG),this);
+    }
+
+    @Override
+    public void loadTresureCollect(int pageIndex, int pageSize) {
+        Map<String,String> params = new HashMap<>();
+        params.put("op", Constants.INTERFACE_GET_ANTIQUES_COLLECTOIN);
+        params.put("pageNum", String.valueOf(pageIndex));
+        params.put("numPerPage", String.valueOf(pageSize));
+        params.put("userid", PreferencesUtils.getString(mContext,Constants.PREFERENCES_USERID));
+        //只有第一页加载才显示进度条
+        if(pageIndex == 0 || pageIndex == 1){
+            view.showProgress();
+        }
+        model.loadTresure(Constants.SERVER_URL, ServerUtils.getRequestParams(params,TAG),this);
+    }
+
+    @Override
+    public void onSuccess(List<AntiqueBean> antiqueBeanList) {
+        view.hideProgress();
+        view.addTresure(antiqueBeanList);
+    }
+
+    @Override
+    public void onFailure(String msg, Exception e) {
+        view.hideProgress();
+    }
+}
