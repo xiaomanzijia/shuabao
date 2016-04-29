@@ -45,6 +45,7 @@ import com.jhlc.km.sb.tabtresure.presenter.TresurePresenter;
 import com.jhlc.km.sb.tabtresure.presenter.TresurePresenterImpl;
 import com.jhlc.km.sb.tabtresure.view.TresureView;
 import com.jhlc.km.sb.utils.CommomUtils;
+import com.jhlc.km.sb.utils.CommonHelper;
 import com.jhlc.km.sb.utils.ListUtils;
 import com.jhlc.km.sb.utils.PreferencesUtils;
 import com.jhlc.km.sb.utils.SoftInputUtils;
@@ -133,7 +134,7 @@ public class MeFragment extends BaseFragment implements SearchPopupWindow.onClic
 
     private boolean isSearch = false;//判断是否搜索
 
-    private IWXAPI api;
+    private CommonHelper commonHelper;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -145,7 +146,8 @@ public class MeFragment extends BaseFragment implements SearchPopupWindow.onClic
         presenter = new TresurePresenterImpl(this, getActivity());
         antiqueBeanList = new ArrayList<>();
         helper = new ServerInterfaceHelper(this, getActivity());
-        api = ((SbApplication)getActivity().getApplication()).api;
+        commonHelper = new CommonHelper(getActivity());
+
     }
 
 
@@ -219,27 +221,43 @@ public class MeFragment extends BaseFragment implements SearchPopupWindow.onClic
             @Override
             public void onShareClick(int position, final String id, final String content, final String tresureIndexImage) { //分享
                 if(!(StringUtils.isBlank(id) || StringUtils.isBlank(content))){
-                    new Thread(new Runnable() {
+                    final ShareDialogFragment shareDialogFragment = new ShareDialogFragment();
+                    shareDialogFragment.show(getFragmentManager(),"share");
+                    shareDialogFragment.setListener(new ShareDialogFragment.ShareClickListener() {
                         @Override
-                        public void run() {
-                            WXWebpageObject webpage = new WXWebpageObject();
-                            webpage.webpageUrl = Constants.WEB_WECHAT_URL+id;
-
-                            WXMediaMessage msgWx = new WXMediaMessage(webpage);
-                            msgWx.title = content.substring(0,6);
-                            msgWx.description = content;
-
-                            Bitmap thumb = CommomUtils.getBitmap(tresureIndexImage); //请求网络图片地址转换为bitmap
-                            msgWx.thumbData = CommomUtils.bmpToByteArray(thumb,true);
-
-                            SendMessageToWX.Req req = new SendMessageToWX.Req();
-                            req.transaction = buildTransaction("webpage");
-                            req.message = msgWx;
-                            req.scene = SendMessageToWX.Req.WXSceneTimeline; //分享到朋友圈
-
-                            api.sendReq(req);
+                        public void onClick(View view) {
+                            switch (view.getId()) {
+                                case R.id.llShareSina:
+                                    ToastUtils.show(getActivity(),"新浪");
+                                    break;
+                                case R.id.llShareWeChat:
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            commonHelper.shareWeChat(id, content ,tresureIndexImage , SendMessageToWX.Req.WXSceneSession);
+                                        }
+                                    }).start();
+                                    break;
+                                case R.id.llShareFriendCicle:
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            commonHelper.shareWeChat(id, content ,tresureIndexImage , SendMessageToWX.Req.WXSceneTimeline);
+                                        }
+                                    }).start();
+                                    break;
+                                case R.id.llShareQQ:
+                                    ToastUtils.show(getActivity(),"QQ");
+                                    break;
+                                case R.id.llShareMessage:
+                                    ToastUtils.show(getActivity(),"短信");
+                                    break;
+                                case R.id.btnCancle:
+                                    shareDialogFragment.dismiss();
+                                    break;
+                            }
                         }
-                    }).start();
+                    });
                 }
             }
 
@@ -277,36 +295,6 @@ public class MeFragment extends BaseFragment implements SearchPopupWindow.onClic
         return view;
     }
 
-    Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case 1:
-                    AntiqueBean antiqueBean = (AntiqueBean) msg.obj;
-                    WXWebpageObject webpage = new WXWebpageObject();
-                    webpage.webpageUrl = Constants.WEB_WECHAT_URL+antiqueBean.getId();
-
-                    WXMediaMessage msgWx = new WXMediaMessage(webpage);
-                    msgWx.title = antiqueBean.getDescribe().substring(0,6);
-                    msgWx.description = antiqueBean.getDescribe();
-
-                    Bitmap thumb = CommomUtils.getBitmap(antiqueBean.getIndeximage());
-                    msgWx.thumbData = CommomUtils.bmpToByteArray(thumb,true);
-
-                    SendMessageToWX.Req req = new SendMessageToWX.Req();
-                    req.transaction = buildTransaction("webpage");
-                    req.message = msgWx;
-                    req.scene = SendMessageToWX.Req.WXSceneTimeline; //分享到朋友圈
-
-                    api.sendReq(req);
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-
     @Override
     public void initView() {
         super.initView();
@@ -319,10 +307,6 @@ public class MeFragment extends BaseFragment implements SearchPopupWindow.onClic
         initUserView();
         //如果编辑宝贝后返回不需要初始化recyclerview 待实现
         initRecylerView();
-    }
-
-    private String buildTransaction(final String type) {
-        return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();
     }
 
     private void initRecylerView() {

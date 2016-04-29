@@ -1,11 +1,8 @@
 package com.jhlc.km.sb.fragment;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.DisplayMetrics;
+import android.support.v4.app.DialogFragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +37,16 @@ public class ShareDialogFragment extends DialogFragment {
     @Bind(R.id.btnCancle)
     TextView btnCancle;
 
+    private ShareClickListener listener;
+
+    public interface ShareClickListener{
+        void onClick(View view);
+    }
+
+    public void setListener(ShareClickListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,25 +78,6 @@ public class ShareDialogFragment extends DialogFragment {
 
     @OnClick({R.id.llShareSina, R.id.llShareWeChat, R.id.llShareFriendCicle, R.id.llShareQQ, R.id.llShareMessage, R.id.btnCancle})
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.llShareSina:
-                ToastUtils.show(getActivity(),"新浪");
-                break;
-            case R.id.llShareWeChat:
-                ToastUtils.show(getActivity(),"微信");
-                break;
-            case R.id.llShareFriendCicle:
-                ToastUtils.show(getActivity(),"朋友圈");
-                break;
-            case R.id.llShareQQ:
-                ToastUtils.show(getActivity(),"QQ");
-                break;
-            case R.id.llShareMessage:
-                ToastUtils.show(getActivity(),"短信");
-                break;
-            case R.id.btnCancle:
-                this.dismiss();
-                break;
-        }
+        listener.onClick(view);
     }
 }

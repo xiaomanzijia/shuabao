@@ -44,6 +44,7 @@ import com.jhlc.km.sb.model.AntiqueDetailServerModel;
 import com.jhlc.km.sb.model.CommentBean;
 import com.jhlc.km.sb.model.ImageBean;
 import com.jhlc.km.sb.model.ThumbCountBean;
+import com.jhlc.km.sb.utils.CommonHelper;
 import com.jhlc.km.sb.utils.ListUtils;
 import com.jhlc.km.sb.utils.PreferencesUtils;
 import com.jhlc.km.sb.utils.SoftInputUtils;
@@ -51,6 +52,7 @@ import com.jhlc.km.sb.utils.StatusBarCompat;
 import com.jhlc.km.sb.utils.StringUtils;
 import com.jhlc.km.sb.utils.ToastUtils;
 import com.jhlc.km.sb.view.PreImageLayout;
+import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
 import com.umeng.analytics.MobclickAgent;
 
 import java.io.File;
@@ -154,6 +156,10 @@ public class TresureDetailActivity extends BaseActivity implements AntiqueDetail
 
     private ImageDownLoader mImageDownLoader; //图片下载缓存本地
 
+    private CommonHelper commonHelper;
+
+    private String tresureIndexUrl; //宝贝大图地址
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -180,6 +186,7 @@ public class TresureDetailActivity extends BaseActivity implements AntiqueDetail
         commentBeanList = new ArrayList<>();
         mImageDownLoader = new ImageDownLoader(TresureDetailActivity.this);
         onRefresh();
+        commonHelper = new CommonHelper(TresureDetailActivity.this);
     }
 
 
@@ -226,8 +233,43 @@ public class TresureDetailActivity extends BaseActivity implements AntiqueDetail
                 }
                 break;
             case R.id.btnShare:
-                ShareDialogFragment dialogFragment = new ShareDialogFragment();
-                dialogFragment.show(getFragmentManager(), "sharedialog");
+                final ShareDialogFragment dialogFragment = new ShareDialogFragment();
+                dialogFragment.show(getSupportFragmentManager(), "sharedialog");
+                dialogFragment.setListener(new ShareDialogFragment.ShareClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        switch (view.getId()) {
+                            case R.id.llShareSina:
+                                ToastUtils.show(TresureDetailActivity.this,"新浪");
+                                break;
+                            case R.id.llShareWeChat:
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        commonHelper.shareWeChat(aniqueId,aniqueName,tresureIndexUrl + Constants.OSS_IMAGE_SIZE100,SendMessageToWX.Req.WXSceneSession);
+                                    }
+                                }).start();
+                                break;
+                            case R.id.llShareFriendCicle:
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        commonHelper.shareWeChat(aniqueId,aniqueName,tresureIndexUrl + Constants.OSS_IMAGE_SIZE100,SendMessageToWX.Req.WXSceneTimeline);
+                                    }
+                                }).start();
+                                break;
+                            case R.id.llShareQQ:
+                                ToastUtils.show(TresureDetailActivity.this,"QQ");
+                                break;
+                            case R.id.llShareMessage:
+                                ToastUtils.show(TresureDetailActivity.this,"短信");
+                                break;
+                            case R.id.btnCancle:
+                                dialogFragment.dismiss();
+                                break;
+                        }
+                    }
+                });
                 break;
             case R.id.llUserInfo:
                 Intent userinfopage = new Intent(getApplicationContext(), UserInfoPageAcitivity.class);
@@ -347,9 +389,9 @@ public class TresureDetailActivity extends BaseActivity implements AntiqueDetail
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        String url = Constants.OSS_IMAGE_URL + antiqueDetailBean.getIndeximage() + Constants.OSS_IMAGE_SIZE400;
+                        tresureIndexUrl = Constants.OSS_IMAGE_URL + antiqueDetailBean.getIndeximage();
                         try {
-                            Bitmap bitmap = mImageDownLoader.getBitmap(url);
+                            Bitmap bitmap = mImageDownLoader.getBitmap(tresureIndexUrl + Constants.OSS_IMAGE_SIZE400);
                             Message msg = new Message();
                             msg.what = 1;
                             msg.obj = bitmap;

@@ -3,6 +3,13 @@ package com.jhlc.km.sb.utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.jhlc.km.sb.SbApplication;
+import com.jhlc.km.sb.constants.Constants;
+import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.sdk.modelmsg.WXWebpageObject;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

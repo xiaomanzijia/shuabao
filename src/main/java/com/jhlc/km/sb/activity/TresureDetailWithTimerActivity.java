@@ -259,7 +259,7 @@ public class TresureDetailWithTimerActivity extends BaseActivity implements Anti
                 break;
             case R.id.btnShare:
                 ShareDialogFragment dialogFragment = new ShareDialogFragment();
-                dialogFragment.show(getFragmentManager(), "sharedialog");
+                dialogFragment.show(getSupportFragmentManager(), "sharedialog");
                 break;
             case R.id.llUserInfo:
                 Intent userinfopage = new Intent(getApplicationContext(), UserInfoPageAcitivity.class);

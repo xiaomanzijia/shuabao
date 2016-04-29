@@ -132,8 +132,8 @@ public class TabTresureMeFragmentAdapter extends RecyclerView.Adapter<RecyclerVi
             @Override
             public void onClick(View v) {
                 int pos = holder.getAdapterPosition();
-                listener.onShareClick(pos,antiqueBeanList.get(pos).getId(),antiqueBeanList.get(pos).getDescribe(),
-                        antiqueBeanList.get(pos).getIndeximage()+Constants.OSS_IMAGE_SIZE200);
+                listener.onShareClick(pos,antiqueBeanList.get(pos).getId(),antiqueBeanList.get(pos).getName(),
+                        antiqueBeanList.get(pos).getIndeximage()+Constants.OSS_IMAGE_SIZE100);
             }
         });
 

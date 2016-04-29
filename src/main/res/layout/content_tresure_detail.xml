@@ -50,12 +50,13 @@
                     android:layout_width="wrap_content"
                     android:id="@+id/btnCollect"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentRight="false"
                     android:background="@color/transparent"
                     android:src="@drawable/ibtn_collection_background"
                     android:layout_centerVertical="true"
                     android:scaleType="fitXY"
-                    android:layout_margin="@dimen/abc_action_bar_overflow_padding_start_material" />
+                    android:layout_margin="@dimen/abc_action_bar_overflow_padding_start_material"
+                    android:layout_toLeftOf="@+id/btnShare" />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -67,7 +68,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:textColor="@color/white"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
 
             </RelativeLayout>
 

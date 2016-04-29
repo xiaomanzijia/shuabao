@@ -174,6 +174,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler,Serv
                     break;
             }
             Toast.makeText(WXEntryActivity.this,result,Toast.LENGTH_LONG).show();
+            this.finish();
         }
     }
 
